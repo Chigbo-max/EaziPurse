@@ -14,8 +14,8 @@ RUN npm ci
 # Copy source code
 COPY eazi-purse-frontend/ .
 
-# Build frontend
-RUN npm run build
+# Fix permissions for vite and build frontend
+RUN chmod +x node_modules/.bin/vite && npm run build
 
 # Stage 2: Build Backend
 FROM python:3.11-slim AS backend-builder
