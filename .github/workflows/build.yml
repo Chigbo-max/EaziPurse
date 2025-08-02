@@ -150,14 +150,28 @@ jobs:
         run: |
           cd WalletAppInDjango
           echo "=== Testing Django import with correct Python path ==="
+          echo "=== Checking directory names ==="
+          ls -la | grep -i eazi
+          echo "=== Checking eaziPurse directory contents ==="
+          ls -la eaziPurse/
+          echo "=== Testing module import with importlib ==="
           pipenv run python -c "
           import os
           import sys
+          import importlib
           import django
           # Add current directory to Python path
           sys.path.insert(0, os.getcwd())
           print('Current directory:', os.getcwd())
           print('Python path:', sys.path)
+          print('Available modules:', [d for d in os.listdir('.') if os.path.isdir(d) and not d.startswith('.')])
+          try:
+              eaziPurse_module = importlib.import_module('eaziPurse')
+              print('eaziPurse module imported successfully:', eaziPurse_module)
+              settings_module = importlib.import_module('eaziPurse.settings')
+              print('Settings module imported successfully:', settings_module)
+          except Exception as e:
+              print('Module import failed:', e)
           os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eaziPurse.settings')
           django.setup()
           print('Django setup successful!')
@@ -214,6 +228,21 @@ jobs:
           except Exception as e:
               print('Settings import failed:', e)
           "
+          echo "=== Testing direct module import ==="
+          pipenv run python -c "
+          import os
+          import sys
+          sys.path.insert(0, os.getcwd())
+          try:
+              import eaziPurse
+              print('eaziPurse module import successful!')
+              print('eaziPurse module contents:', dir(eaziPurse))
+          except Exception as e:
+              print('eaziPurse module import failed:', e)
+          "
+          echo "=== Checking __init__.py files ==="
+          ls -la eaziPurse/__init__.py
+          cat eaziPurse/__init__.py
           echo "=== Running Django check ==="
           pipenv run python manage.py check
 
