@@ -11,71 +11,31 @@ import {
   EnvelopeIcon,
   PhoneIcon,
 } from '@heroicons/react/24/outline';
+import { useGetAdminUsersQuery } from '../../store/apiSlice';
 
 const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Mock data - in real app, this would come from API
-  const users = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+234 801 234 5678',
-      status: 'active',
-      balance: '₦125,000',
-      joined: '2024-01-15',
-      lastActive: '2 hours ago',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+234 802 345 6789',
-      status: 'pending',
-      balance: '₦0',
-      joined: '2024-01-16',
-      lastActive: '1 day ago',
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      email: 'mike@example.com',
-      phone: '+234 803 456 7890',
-      status: 'active',
-      balance: '₦75,500',
-      joined: '2024-01-14',
-      lastActive: '30 minutes ago',
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      email: 'sarah@example.com',
-      phone: '+234 804 567 8901',
-      status: 'suspended',
-      balance: '₦0',
-      joined: '2024-01-13',
-      lastActive: '3 days ago',
-    },
-    {
-      id: 5,
-      name: 'David Brown',
-      email: 'david@example.com',
-      phone: '+234 805 678 9012',
-      status: 'active',
-      balance: '₦250,000',
-      joined: '2024-01-12',
-      lastActive: '5 hours ago',
-    },
-  ];
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || user.status === filterStatus;
-    return matchesSearch && matchesFilter;
+  
+  const { data: usersData, isLoading, error } = useGetAdminUsersQuery({
+    search: searchTerm || undefined,
+    status: filterStatus === 'all' ? undefined : filterStatus,
   });
+
+  // Format users from real data
+  const users = usersData?.map(user => ({
+    id: user.id,
+    name: user.full_name,
+    email: user.email,
+    phone: user.phone || 'N/A',
+    status: user.status,
+    balance: `₦${Number(user.wallet_balance).toLocaleString()}`,
+    joined: new Date(user.date_joined).toLocaleDateString(),
+    lastActive: 'Recently', // You can add last login tracking
+  })) || [];
+
+  // Filtering is now handled by the API
+  const filteredUsers = users;
 
   const getStatusIcon = (status) => {
     switch (status) {

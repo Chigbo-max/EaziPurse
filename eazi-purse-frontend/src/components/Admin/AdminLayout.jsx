@@ -13,7 +13,6 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   DocumentTextIcon,
-  BellIcon,
 } from '@heroicons/react/24/outline';
 import { logout } from '../../store/authSlice';
 import { selectCurrentUser } from '../../store/authSlice';
@@ -177,10 +176,6 @@ const AdminLayout = () => {
             <p className="text-white/60">Manage your platform</p>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-              <BellIcon className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-danger-500 rounded-full"></span>
-            </button>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-danger-500 to-danger-700 rounded-full flex items-center justify-center">
                 <ShieldCheckIcon className="w-5 h-5 text-white" />

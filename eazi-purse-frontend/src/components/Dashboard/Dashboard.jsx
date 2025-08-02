@@ -55,37 +55,21 @@ const Dashboard = () => {
     },
     {
       name: 'Total Transactions',
-      value: '0',
+      value: dashboardData?.total_transactions || '0',
       icon: ChartBarIcon,
       color: 'warning',
       gradient: 'warning-gradient',
     },
     {
       name: 'Account Status',
-      value: 'Active',
+      value: dashboardData?.account_status || 'Active',
       icon: UserIcon,
       color: 'success',
       gradient: 'success-gradient',
     },
   ];
 
-  const recentTransactions = [
-    // This would be populated from actual transaction data
-    {
-      id: 1,
-      type: 'Deposit',
-      amount: '₦50,000',
-      date: '2024-01-15',
-      status: 'Completed',
-    },
-    {
-      id: 2,
-      type: 'Transfer',
-      amount: '₦25,000',
-      date: '2024-01-14',
-      status: 'Completed',
-    },
-  ];
+  const recentTransactions = dashboardData?.recent_transactions || [];
 
   return (
     <div className="space-y-6">
@@ -188,6 +172,7 @@ const Dashboard = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/profile')}
               className="btn-warning"
             >
               Settings
@@ -202,7 +187,7 @@ const Dashboard = () => {
           transition={{ delay: 0.4 }}
           className="card-gradient p-6 rounded-2xl"
         >
-          <h2 className="text-xl font-bold text-white mb-4">Recent Transactions</h2>
+          <h2 className="text-xl font-bold text-white mb-4">Latest Transactions</h2>
           <div className="space-y-4">
             {recentTransactions.map((transaction) => (
               <motion.div
@@ -250,7 +235,9 @@ const Dashboard = () => {
               <ArrowTrendingUpIcon className="w-8 h-8 text-success-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-1">Savings Growth</h3>
-            <p className="text-success-400 font-medium">+12.5%</p>
+            <p className="text-success-400 font-medium">
+              {dashboardData?.savings_growth ? `+${Number(dashboardData.savings_growth).toFixed(1)}%` : '+0.0%'}
+            </p>
             <p className="text-sm text-white/60">This month</p>
           </div>
           <div className="text-center">
@@ -258,7 +245,9 @@ const Dashboard = () => {
               <ChartBarIcon className="w-8 h-8 text-primary-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-1">Transaction Volume</h3>
-            <p className="text-primary-400 font-medium">₦2.5M</p>
+            <p className="text-primary-400 font-medium">
+              ₦{dashboardData?.transaction_volume ? Number(dashboardData.transaction_volume || 0).toLocaleString() : '0'}
+            </p>
             <p className="text-sm text-white/60">This month</p>
           </div>
           <div className="text-center">
@@ -266,7 +255,7 @@ const Dashboard = () => {
               <CreditCardIcon className="w-8 h-8 text-warning-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-1">Active Cards</h3>
-            <p className="text-warning-400 font-medium">3</p>
+            <p className="text-warning-400 font-medium">1</p>
             <p className="text-sm text-white/60">Linked accounts</p>
           </div>
         </div>

@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGetProfileQuery, useUpdateProfileMutation } from '../../store/apiSlice';
+import { useGetProfileQuery, useUpdateProfileMutation, useUpdateUserMutation } from '../../store/apiSlice';
 import { useGetCurrentUserQuery } from '../../store/apiSlice';
 import toast from 'react-hot-toast';
 import { showErrorMessages } from '../../utils/errorHandler';
+import ChangePasswordModal from './ChangePasswordModal';
+import LoginHistoryModal from './LoginHistoryModal';
 
 const Profile = () => {
   const { data: profileData, isLoading: profileLoading, error: profileError } = useGetProfileQuery();
   const { data: userData, isLoading: userLoading, error: userError } = useGetCurrentUserQuery();
-  const [updateProfile, { isLoading: updateLoading }] = useUpdateProfileMutation();
+  const [updateProfile, { isLoading: updateProfileLoading }] = useUpdateProfileMutation();
+  const [updateUser, { isLoading: updateUserLoading }] = useUpdateUserMutation();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showLoginHistory, setShowLoginHistory] = useState(false);
   const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
     address: '',
     nin: '',
     bvn: '',
   });
 
-  // Update formData when profileData loads
+  // Update formData when profileData and userData load
   React.useEffect(() => {
-    if (profileData) {
+    if (profileData && userData) {
       setFormData({
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
         address: profileData.address || '',
         nin: profileData.nin || '',
         bvn: profileData.bvn || '',
       });
     }
-  }, [profileData]);
+  }, [profileData, userData]);
 
   const handleChange = (e) => {
     setFormData({
@@ -39,7 +48,19 @@ const Profile = () => {
     e.preventDefault();
     
     try {
-      await updateProfile(formData).unwrap();
+      const userData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+      };
+      await updateUser(userData).unwrap();
+      
+      const profileData = {
+        address: formData.address,
+        nin: formData.nin,
+        bvn: formData.bvn,
+      };
+      await updateProfile(profileData).unwrap();
+      
       toast.success('Profile updated successfully!');
       setIsEditing(false);
     } catch (error) {
@@ -71,15 +92,8 @@ const Profile = () => {
   const user = userData;
   const profile = profileData;
 
-  // Debug logging
-  console.log('User data:', user);
-  console.log('Profile data:', profile);
-  console.log('User error:', userError);
-  console.log('Profile error:', profileError);
-
   return (
     <div className="space-y-6">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -92,6 +106,13 @@ const Profile = () => {
           <p className="text-white/60 mt-2">
             Manage your account information and settings
           </p>
+          {(!userData?.first_name || !userData?.last_name) && (
+            <div className="mt-4 p-4 bg-warning-500/20 border border-warning-500/30 rounded-lg">
+              <p className="text-warning-400 text-sm">
+                <strong>Note:</strong> Please update your first and last name to ensure proper display in transaction history.
+              </p>
+            </div>
+          )}
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -104,7 +125,6 @@ const Profile = () => {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile Information */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -115,16 +135,33 @@ const Profile = () => {
           
           {isEditing ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={`${user?.first_name || ''} ${user?.last_name || ''}`}
-                  className="input-field"
-                  disabled
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    className="input-field"
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/80 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    className="input-field"
+                    placeholder="Last name"
+                  />
+                </div>
               </div>
               
               <div>
@@ -199,10 +236,10 @@ const Profile = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={updateLoading}
+                disabled={updateProfileLoading || updateUserLoading}
                 className="btn-primary w-full"
               >
-                {updateLoading ? (
+                {updateProfileLoading || updateUserLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Updating...
@@ -257,14 +294,13 @@ const Profile = () => {
           )}
         </motion.div>
 
-        {/* Account Security */}
+        
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
           className="space-y-6"
         >
-          {/* Account Status */}
           <div className="success-gradient p-6 rounded-2xl">
             <h3 className="text-lg font-semibold text-white mb-4">Account Status</h3>
             <div className="space-y-3">
@@ -279,7 +315,11 @@ const Profile = () => {
               <div className="flex items-center justify-between">
                 <span className="text-white/60">Member Since</span>
                 <span className="text-white/80 text-sm">
-                  {new Date(user?.date_joined).toLocaleDateString()}
+                  {user?.date_joined ? new Date(user.date_joined).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  }) : 'N/A'}
                 </span>
               </div>
             </div>
@@ -292,22 +332,7 @@ const Profile = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full text-left p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-medium">Two-Factor Authentication</p>
-                    <p className="text-white/60 text-sm">Add an extra layer of security</p>
-                  </div>
-                  <div className="w-6 h-6 bg-success-500/20 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-success-400 rounded-full"></div>
-                  </div>
-                </div>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowChangePassword(true)}
                 className="w-full text-left p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -324,12 +349,15 @@ const Profile = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setShowLoginHistory(true);
+                }}
                 className="w-full text-left p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">Login History</p>
-                    <p className="text-white/60 text-sm">View recent login activity</p>
+                    <p className="text-white/60 text-sm">View your latest 4 login sessions</p>
                   </div>
                   <div className="w-6 h-6 bg-warning-500/20 rounded-full flex items-center justify-center">
                     <div className="w-3 h-3 bg-warning-400 rounded-full"></div>
@@ -339,33 +367,27 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Preferences */}
-          <div className="card-gradient p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4">Preferences</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-medium">Email Notifications</p>
-                  <p className="text-white/60 text-sm">Receive transaction alerts</p>
-                </div>
-                <div className="w-12 h-6 bg-success-500 rounded-full relative">
-                  <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-medium">SMS Notifications</p>
-                  <p className="text-white/60 text-sm">Receive SMS alerts</p>
-                </div>
-                <div className="w-12 h-6 bg-success-500 rounded-full relative">
-                  <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </motion.div>
       </div>
+
+      {showChangePassword && (
+        <ChangePasswordModal 
+          onClose={() => setShowChangePassword(false)}
+        />
+      )}
+
+      {showLoginHistory && (
+        <div>
+          {console.log('Rendering LoginHistoryModal')}
+          <LoginHistoryModal 
+            onClose={() => {
+              console.log('Closing login history modal');
+              setShowLoginHistory(false);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

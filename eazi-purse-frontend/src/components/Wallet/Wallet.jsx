@@ -41,7 +41,7 @@ const Wallet = () => {
     },
     {
       name: 'Transaction History',
-      description: 'View all your transactions',
+      description: 'View your latest 4 transactions',
       icon: ClockIcon,
       color: 'primary',
       href: '/wallet/history',
@@ -137,7 +137,7 @@ const Wallet = () => {
         transition={{ delay: 0.4 }}
         className="card-gradient p-6 rounded-2xl"
       >
-        <h2 className="text-xl font-bold text-white mb-6">Recent Activity</h2>
+        <h2 className="text-xl font-bold text-white mb-6">Sample Activity</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
             <div className="flex items-center space-x-3">

@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 // Get token from localStorage
 const getToken = () => {
   const token = localStorage.getItem('access_token');
@@ -9,7 +10,7 @@ const getToken = () => {
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000',
+    baseUrl: baseUrl,
     prepareHeaders: (headers) => {
       const token = getToken();
       if (token) {
@@ -124,6 +125,79 @@ export const apiSlice = createApi({
       query: () => '/wallet/transactions/',
       providesTags: ['Transaction'],
     }),
+    
+    getAdminTransactions: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params?.filter) searchParams.append('filter', params.filter);
+        if (params?.search) searchParams.append('search', params.search);
+        return `/wallet/admin/transactions/?${searchParams.toString()}`;
+      },
+      providesTags: ['AdminTransactions'],
+    }),
+    
+
+    
+    // Change password endpoint
+    changePassword: builder.mutation({
+      query: (passwordData) => ({
+        url: '/user/change-password/',
+        method: 'PUT',
+        body: passwordData,
+      }),
+    }),
+    
+    // Login history endpoint
+    getLoginHistory: builder.query({
+      query: () => '/user/login-history/',
+      providesTags: ['LoginHistory'],
+    }),
+    
+    // Admin endpoints
+    getAdminDashboard: builder.query({
+      query: () => '/user/admin/dashboard/',
+      providesTags: ['Admin'],
+    }),
+    
+    getAdminUsers: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.append('search', params.search);
+        if (params?.status) searchParams.append('status', params.status);
+        return `/user/admin/users/?${searchParams.toString()}`;
+      },
+      providesTags: ['AdminUsers'],
+    }),
+    
+    updateAdminUser: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/user/admin/users/${id}/`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['AdminUsers'],
+    }),
+    
+    getAdminSettings: builder.query({
+      query: () => '/user/admin/settings/',
+      providesTags: ['AdminSettings'],
+    }),
+    
+    getAdminAnalytics: builder.query({
+      query: (period = 'week') => `/user/admin/analytics/?period=${period}`,
+      providesTags: ['AdminAnalytics'],
+    }),
+    
+
+    
+    updateAdminSettings: builder.mutation({
+      query: (settings) => ({
+        url: '/user/admin/settings/',
+        method: 'PUT',
+        body: settings,
+      }),
+      invalidatesTags: ['AdminSettings'],
+    }),
   }),
 });
 
@@ -137,8 +211,19 @@ export const {
   useUpdateProfileMutation,
   useCreateProfileMutation,
   useGetDashboardQuery,
+  useChangePasswordMutation,
+  useGetLoginHistoryQuery,
   useFundWalletMutation,
   useVerifyFundMutation,
   useTransferFundMutation,
   useGetTransactionsQuery,
+  useGetAdminTransactionsQuery,
+  
+  // Admin hooks
+  useGetAdminDashboardQuery,
+  useGetAdminUsersQuery,
+  useUpdateAdminUserMutation,
+  useGetAdminSettingsQuery,
+      useUpdateAdminSettingsMutation,
+    useGetAdminAnalyticsQuery,
 } = apiSlice; 

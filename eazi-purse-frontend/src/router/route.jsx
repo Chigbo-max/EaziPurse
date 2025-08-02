@@ -11,7 +11,10 @@ import FundWallet from "../components/Wallet/FundWallet.jsx";
 import VerifyPayment from "../components/Wallet/VerifyPayment.jsx";
 import TransactionHistory from "../components/Wallet/TransactionHistory.jsx";
 import AdminDashboard from "../components/Admin/AdminDashboard.jsx";
-import Users from "../components/Admin/Users.jsx";
+import AdminUsers from "../components/Admin/AdminUsers.jsx";
+import AdminTransactionHistory from "../components/Admin/AdminTransactionHistory.jsx";
+import Analytics from "../components/Admin/Analytics.jsx";
+import Reports from "../components/Admin/Reports.jsx";
 import Settings from "../components/Admin/Settings.jsx";
 import ProtectedRoute from "../components/Auth/ProtectedRoute.jsx";
 import NotFound from "../components/Error/NotFound.jsx";
@@ -37,7 +40,10 @@ const BrowserRouter = createBrowserRouter([
     children: [
       { path: "/admin", element: <AdminDashboard /> },
       { path: "/admin/dashboard", element: <AdminDashboard /> },
-      { path: "/admin/users", element: <Users /> },
+      { path: "/admin/users", element: <AdminUsers /> },
+      { path: "/admin/transactions", element: <AdminTransactionHistory /> },
+      { path: "/admin/analytics", element: <Analytics /> },
+      { path: "/admin/reports", element: <Reports /> },
       { path: "/admin/settings", element: <Settings /> },
     ]
   },

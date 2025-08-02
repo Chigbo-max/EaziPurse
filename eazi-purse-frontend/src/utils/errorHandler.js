@@ -27,10 +27,10 @@ export const parseErrorMessage = (error) => {
       const fieldErrors = data[field];
       if (Array.isArray(fieldErrors)) {
         fieldErrors.forEach(errorMsg => {
-          errorMessages.push(`${field.charAt(0).toUpperCase() + field.slice(1)}: ${errorMsg}`);
+          errorMessages.push(`${errorMsg}`);
         });
       } else if (typeof fieldErrors === 'string') {
-        errorMessages.push(`${field.charAt(0).toUpperCase() + field.slice(1)}: ${fieldErrors}`);
+        errorMessages.push(`${fieldErrors}`);
       }
     });
     
