@@ -50,7 +50,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -65,14 +65,19 @@ jobs:
           pip install pipenv
           python --version
           pipenv --version
+          which python
+          which pipenv
 
       - name: Install backend dependencies
         run: |
           cd WalletAppInDjango
+          pipenv --rm || true
           pipenv lock --clear
           pipenv install --dev
           pipenv run pip list
           pipenv --venv
+          pipenv run which python
+          echo "Virtual environment path: $(pipenv --venv)"
 
       - name: Create environment file for Django
         run: |
@@ -111,6 +116,8 @@ jobs:
       - name: Verify Django installation
         run: |
           cd WalletAppInDjango
+          pipenv run python --version
+          pipenv run python -c "import sys; print('Python executable:', sys.executable)"
           pipenv run python -c "import sys; print('Python path:', sys.path)"
           pipenv run python -c "import django; print('Django version:', django.get_version())"
           pipenv run python -c "import rest_framework; print('DRF version:', rest_framework.VERSION)"
