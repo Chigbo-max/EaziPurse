@@ -149,9 +149,15 @@ jobs:
       - name: Test Django import
         run: |
           cd WalletAppInDjango
+          echo "=== Testing Django import with correct Python path ==="
           pipenv run python -c "
           import os
+          import sys
           import django
+          # Add current directory to Python path
+          sys.path.insert(0, os.getcwd())
+          print('Current directory:', os.getcwd())
+          print('Python path:', sys.path)
           os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eaziPurse.settings')
           django.setup()
           print('Django setup successful!')
@@ -164,6 +170,10 @@ jobs:
           import time
           import psycopg2
           import os
+          import sys
+          
+          # Add current directory to Python path
+          sys.path.insert(0, os.getcwd())
           
           for i in range(30):
               try:
@@ -187,6 +197,24 @@ jobs:
       - name: Check Django configuration
         run: |
           cd WalletAppInDjango
+          echo "=== Checking Django project structure ==="
+          ls -la
+          echo "=== Checking eaziPurse directory ==="
+          ls -la eaziPurse/
+          echo "=== Checking if settings.py exists ==="
+          ls -la eaziPurse/settings.py
+          echo "=== Testing settings import ==="
+          pipenv run python -c "
+          import os
+          import sys
+          sys.path.insert(0, os.getcwd())
+          try:
+              import eaziPurse.settings
+              print('Settings import successful!')
+          except Exception as e:
+              print('Settings import failed:', e)
+          "
+          echo "=== Running Django check ==="
           pipenv run python manage.py check
 
       - name: Run backend tests
