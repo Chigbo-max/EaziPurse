@@ -3,6 +3,10 @@ services:
   postgres:
     image: postgres:17
     container_name: eazipurse_postgres
+
+    env_file:
+      - .env
+        
     environment:
       POSTGRES_DB: eazipurse_db
       POSTGRES_USER: ${DB_USER}
