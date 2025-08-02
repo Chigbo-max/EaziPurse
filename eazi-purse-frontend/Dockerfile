@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
 COPY . .
 
@@ -13,6 +14,9 @@ RUN npm run build
 
 # Install serve to run the built app
 RUN npm install -g serve
+
+# Remove dev dependencies to reduce image size
+RUN npm prune --production
 
 EXPOSE 5173
 

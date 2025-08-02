@@ -30,8 +30,12 @@ services:
     environment:
       - DEBUG=False
       - DJANGO_SETTINGS_MODULE=eaziPurse.settings
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/eazipurse_db
-      - JWT_SECRET=${JWT_SECRET}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${SECRET_KEY}
       - PAYSTACK_KEY=${PAYSTACK_KEY}
       - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
       - EMAIL_HOST=${EMAIL_HOST}
