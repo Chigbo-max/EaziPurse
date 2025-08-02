@@ -93,16 +93,11 @@ jobs:
               echo "Django project files found in WalletAppInDjango"
             else
               echo "Django project files not found in WalletAppInDjango"
-              echo "Looking for Django project in parent directory..."
-              cd ..
-              if [ -f "manage.py" ] && [ -d "eaziPurse" ]; then
-                echo "Django project found in parent directory"
-              else
-                echo "Django project not found in parent directory"
-                echo "Searching for Django project files..."
-                find . -name "manage.py" -type f
-                find . -name "eaziPurse" -type d
-              fi
+              echo "Available files in WalletAppInDjango:"
+              ls -la
+              echo "=== Looking for Django project files in repository ==="
+              find . -name "manage.py" -type f
+              find . -name "eaziPurse" -type d
             fi
           else
             echo "WalletAppInDjango does not exist, checking for alternatives"
@@ -136,22 +131,7 @@ jobs:
       - name: Create environment file for Django
         run: |
           echo "=== Creating environment file for Django ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, creating in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           cat > .env.development << EOF
           SECRET_KEY=${{ secrets.SECRET_KEY }}
           DB_NAME=testdb
@@ -194,22 +174,7 @@ jobs:
       - name: Verify Django installation
         run: |
           echo "=== Verifying Django installation ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           pipenv run python --version
           pipenv run python -c "import sys; print('Python executable:', sys.executable)"
           pipenv run python -c "import sys; print('Python path:', sys.path)"
@@ -222,22 +187,7 @@ jobs:
       - name: Install Django manually if needed
         run: |
           echo "=== Installing Django manually if needed ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           pipenv run pip install django djangorestframework djoser djangorestframework-simplejwt drf-yasg django-cors-headers python-dotenv psycopg2-binary reportlab
           echo "=== After manual installation ==="
           pipenv run pip list | grep -i django || echo "Django still not found"
@@ -247,22 +197,7 @@ jobs:
       - name: Test Django import
         run: |
           echo "=== Testing Django import with correct Python path ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           echo "=== Checking directory names ==="
           ls -la
           echo "=== Looking for eaziPurse directory ==="
@@ -282,48 +217,22 @@ jobs:
               echo "Directory: $dir"
             done
           fi
-          echo "=== Testing module import with importlib ==="
+          echo "=== Testing Django setup ==="
           pipenv run python -c "
           import os
           import sys
-          import importlib
           import django
-          # Add current directory to Python path
-          sys.path.insert(0, os.getcwd())
-          print('Current directory:', os.getcwd())
-          print('Python path:', sys.path)
-          print('Available modules:', [d for d in os.listdir('.') if os.path.isdir(d) and not d.startswith('.')])
-          try:
-              eaziPurse_module = importlib.import_module('eaziPurse')
-              print('eaziPurse module imported successfully:', eaziPurse_module)
-              settings_module = importlib.import_module('eaziPurse.settings')
-              print('Settings module imported successfully:', settings_module)
-          except Exception as e:
-              print('Module import failed:', e)
           os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eaziPurse.settings')
           django.setup()
           print('Django setup successful!')
+          print('Current directory:', os.getcwd())
+          print('Available modules:', [d for d in os.listdir('.') if os.path.isdir(d) and not d.startswith('.')])
           "
 
       - name: Wait for database
         run: |
           echo "=== Waiting for database ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           pipenv run python -c "
           import time
           import psycopg2
@@ -355,22 +264,7 @@ jobs:
       - name: Check Django configuration
         run: |
           echo "=== Checking Django configuration ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           echo "=== Checking Django project structure ==="
           ls -la
           echo "=== Checking eaziPurse directory ==="
@@ -409,22 +303,7 @@ jobs:
       - name: Run backend tests
         run: |
           echo "=== Running backend tests ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           pwd
           ls -la
           pipenv run python manage.py test
@@ -432,22 +311,7 @@ jobs:
       - name: Run backend migrations
         run: |
           echo "=== Running backend migrations ==="
-          # Find the Django project directory
-          if [ -f "WalletAppInDjango/manage.py" ]; then
-            cd WalletAppInDjango
-          elif [ -f "manage.py" ]; then
-            echo "manage.py found in current directory"
-          else
-            echo "Looking for manage.py..."
-            MANAGE_PY_PATH=$(find . -name "manage.py" -type f | head -1)
-            if [ -n "$MANAGE_PY_PATH" ]; then
-              DJANGO_DIR=$(dirname "$MANAGE_PY_PATH")
-              echo "Found manage.py in: $DJANGO_DIR"
-              cd "$DJANGO_DIR"
-            else
-              echo "No manage.py found, staying in current directory"
-            fi
-          fi
+          cd WalletAppInDjango
           pipenv run python manage.py migrate
 
   docker:
