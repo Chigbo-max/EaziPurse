@@ -67,6 +67,8 @@ jobs:
           pipenv --version
           which python
           which pipenv
+          echo "=== Pipenv environment ==="
+          pipenv --support
 
       - name: Install backend dependencies
         run: |
@@ -74,10 +76,20 @@ jobs:
           pipenv --rm || true
           pipenv lock --clear
           pipenv install --dev
+          echo "=== Installed packages ==="
           pipenv run pip list
+          echo "=== Virtual environment info ==="
           pipenv --venv
           pipenv run which python
           echo "Virtual environment path: $(pipenv --venv)"
+          echo "=== Checking if Django is in Pipfile ==="
+          cat Pipfile
+          echo "=== Checking if Django is in Pipfile.lock ==="
+          grep -i django Pipfile.lock || echo "Django not found in Pipfile.lock"
+          echo "=== Pipenv graph ==="
+          pipenv graph
+          echo "=== Pipenv environment ==="
+          pipenv --support
 
       - name: Create environment file for Django
         run: |
@@ -119,10 +131,20 @@ jobs:
           pipenv run python --version
           pipenv run python -c "import sys; print('Python executable:', sys.executable)"
           pipenv run python -c "import sys; print('Python path:', sys.path)"
-          pipenv run python -c "import django; print('Django version:', django.get_version())"
-          pipenv run python -c "import rest_framework; print('DRF version:', rest_framework.VERSION)"
-          pipenv run python -c "import djoser; print('Djoser available')"
-          pipenv run python -c "import psycopg2; print('psycopg2 available')"
+          echo "=== Trying to import Django ==="
+          pipenv run python -c "import django; print('Django version:', django.get_version())" || echo "Django not found, installing manually..."
+          pipenv run python -c "import rest_framework; print('DRF version:', rest_framework.VERSION)" || echo "DRF not found"
+          pipenv run python -c "import djoser; print('Djoser available')" || echo "Djoser not found"
+          pipenv run python -c "import psycopg2; print('psycopg2 available')" || echo "psycopg2 not found"
+
+      - name: Install Django manually if needed
+        run: |
+          cd WalletAppInDjango
+          pipenv run pip install django djangorestframework djoser djangorestframework-simplejwt drf-yasg django-cors-headers python-dotenv psycopg2-binary reportlab
+          echo "=== After manual installation ==="
+          pipenv run pip list | grep -i django || echo "Django still not found"
+          echo "=== Virtual environment packages ==="
+          pipenv run pip freeze
 
       - name: Test Django import
         run: |
