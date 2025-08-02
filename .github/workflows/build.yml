@@ -63,11 +63,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pipenv
+          python --version
+          pipenv --version
 
       - name: Install backend dependencies
         run: |
           cd WalletAppInDjango
+          pipenv lock --clear
           pipenv install --dev
+          pipenv run pip list
+          pipenv --venv
 
       - name: Create environment file for Django
         run: |
@@ -102,6 +107,15 @@ jobs:
           pwd
           ls -la
           ls -la WalletAppInDjango/
+
+      - name: Verify Django installation
+        run: |
+          cd WalletAppInDjango
+          pipenv run python -c "import sys; print('Python path:', sys.path)"
+          pipenv run python -c "import django; print('Django version:', django.get_version())"
+          pipenv run python -c "import rest_framework; print('DRF version:', rest_framework.VERSION)"
+          pipenv run python -c "import djoser; print('Djoser available')"
+          pipenv run python -c "import psycopg2; print('psycopg2 available')"
 
       - name: Test Django import
         run: |
