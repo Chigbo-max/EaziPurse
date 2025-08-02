@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17
+    container_name: eazipurse_postgres
+    environment:
+      POSTGRES_DB: eazipurse_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_migration.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - eazipurse_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Django)
+  backend:
+    build:
+      context: ./WalletAppInDjango
+      dockerfile: Dockerfile
+    container_name: eazipurse_backend
+    environment:
+      - DEBUG=False
+      - DJANGO_SETTINGS_MODULE=eaziPurse.settings
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/eazipurse_db
+      - JWT_SECRET=${JWT_SECRET}
+      - PAYSTACK_KEY=${PAYSTACK_KEY}
+      - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+    volumes:
+      - ./WalletAppInDjango:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    networks:
+      - eazipurse_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./eazi-purse-frontend
+      dockerfile: Dockerfile
+    container_name: eazipurse_frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    volumes:
+      - ./eazi-purse-frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - eazipurse_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+
+networks:
+  eazipurse_network:
+    driver: bridge
