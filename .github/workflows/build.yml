@@ -224,7 +224,10 @@ jobs:
           import django
           os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eaziPurse.settings')
           django.setup()
-         
+          print('Django setup successful!')
+          print('Current directory:', os.getcwd())
+          print('Available modules:', [d for d in os.listdir('.') if os.path.isdir(d) and not d.startswith('.')])
+          "
 
       - name: Wait for database
         run: |
