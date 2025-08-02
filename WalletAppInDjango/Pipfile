@@ -13,6 +13,7 @@ djangorestframework-simplejwt = "*"
 drf-yasg = "*"
 django-cors-headers = "*"
 reportlab = "*"
+dj-database-url = "*"
 
 [dev-packages]
 
