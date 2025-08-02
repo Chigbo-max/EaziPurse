@@ -119,6 +119,15 @@ const Login = () => {
               </div>
             </div>
 
+            <div className="text-right">
+              <Link 
+                to="/forgot-password" 
+                className="text-sm text-primary-400 hover:text-primary-300 font-medium"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

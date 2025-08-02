@@ -3,6 +3,8 @@ import Layout from "../components/Layout/Layout.jsx";
 import AdminLayout from "../components/Admin/AdminLayout.jsx";
 import Login from "../components/Auth/Login.jsx";
 import Register from "../components/Auth/Register.jsx";
+import ForgotPassword from "../components/Auth/ForgotPassword.jsx";
+import ResetPassword from "../components/Auth/ResetPassword.jsx";
 import Dashboard from "../components/Dashboard/Dashboard.jsx";
 import Profile from "../components/Profile/Profile.jsx";
 import Wallet from "../components/Wallet/Wallet.jsx";
@@ -49,6 +51,8 @@ const BrowserRouter = createBrowserRouter([
   },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/reset-password", element: <ResetPassword /> },
   { path: "*", element: <NotFound /> }
 ]);
 
