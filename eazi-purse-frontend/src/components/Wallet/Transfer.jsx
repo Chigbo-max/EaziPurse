@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, UserIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
@@ -225,7 +225,7 @@ const Transfer = () => {
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-primary-400 rounded-full mt-2 flex-shrink-0"></div>
                 <p className="text-white/80 text-sm">
-                  You'll receive a confirmation email
+                  You&apos;ll receive a confirmation email
                 </p>
               </div>
             </div>

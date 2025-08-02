@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import {
   CreditCardIcon,
   ChartBarIcon,
   CogIcon,
-  ArrowRightOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
@@ -95,7 +95,7 @@ const AdminLayout = () => {
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
                 <span>Sign out</span>
               </button>
             </div>
@@ -142,7 +142,7 @@ const AdminLayout = () => {
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
                 <span>Sign out</span>
               </button>
             </div>

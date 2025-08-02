@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -12,7 +12,6 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useGetAdminTransactionsQuery } from '../../store/apiSlice';
-import toast from 'react-hot-toast';
 
 const AdminTransactionHistory = () => {
   const navigate = useNavigate();
@@ -65,7 +64,7 @@ const AdminTransactionHistory = () => {
   };
 
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new window.Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN'
     }).format(amount);

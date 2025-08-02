@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, CurrencyDollarIcon, CreditCardIcon } from '@heroicons/react/24/outline';
@@ -189,7 +189,7 @@ const FundWallet = () => {
             <ul className="text-white/80 text-sm space-y-2">
               <li>• All transactions are secured with bank-level encryption</li>
               <li>• Your funds are protected by our security protocols</li>
-              <li>• You'll receive instant confirmation for all transactions</li>
+                              <li>• You&apos;ll receive instant confirmation for all transactions</li>
               <li>• 24/7 customer support available</li>
             </ul>
           </div>

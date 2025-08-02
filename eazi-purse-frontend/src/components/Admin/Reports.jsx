@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  DocumentTextIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
   UsersIcon,
-  CalendarIcon,
   ArrowDownTrayIcon,
   EyeIcon,
   ClockIcon,
@@ -39,14 +37,14 @@ const Reports = () => {
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new window.Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN'
     }).format(amount);
   };
 
   const formatNumber = (num) => {
-    return new Intl.NumberFormat('en-NG').format(num);
+    return new window.Intl.NumberFormat('en-NG').format(num);
   };
 
   const generateReport = async (reportType) => {

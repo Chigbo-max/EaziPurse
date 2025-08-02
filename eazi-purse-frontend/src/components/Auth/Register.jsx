@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -46,17 +46,15 @@ const Register = () => {
     }
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const { confirmPassword, ...registerData } = formData;
-      console.log('Sending registration data:', registerData); // Debug log
       await register(registerData).unwrap();
       
-      // Automatically log in the user after successful registration
       const loginResult = await login({
         email: formData.email,
         password: formData.password
       }).unwrap();
       
-      // Set credentials in Redux store
       dispatch(setCredentials({
         user: loginResult.user,
         access: loginResult.access,
@@ -65,7 +63,6 @@ const Register = () => {
       
       toast.success('Registration successful! Welcome to EaziPurse!');
       
-      // Small delay to ensure Redux store is updated
       setTimeout(() => {
         navigate('/dashboard');
       }, 100);
@@ -84,7 +81,6 @@ const Register = () => {
         transition={{ duration: 0.5 }}
         className="relative w-full max-w-md"
       >
-        {/* Logo and Header */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0 }}

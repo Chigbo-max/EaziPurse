@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -7,7 +7,6 @@ import {
   FunnelIcon,
   PlusIcon,
   PencilIcon,
-  TrashIcon,
   EyeIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -96,7 +95,7 @@ const AdminUsers = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new window.Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN'
     }).format(amount);

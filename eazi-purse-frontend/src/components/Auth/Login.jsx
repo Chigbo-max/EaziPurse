@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -139,7 +139,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <p className="text-white/60">
-              Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
               <Link to="/register" className="text-primary-400 hover:text-primary-300 font-medium">
                 Sign up
               </Link>

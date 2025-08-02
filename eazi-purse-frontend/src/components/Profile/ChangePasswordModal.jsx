@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import PropTypes from 'prop-types';
 import { useChangePasswordMutation } from '../../store/apiSlice';
 import toast from 'react-hot-toast';
 import { showErrorMessages } from '../../utils/errorHandler';
@@ -200,6 +201,10 @@ const ChangePasswordModal = ({ onClose }) => {
       </motion.div>
     </AnimatePresence>
   );
+};
+
+ChangePasswordModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default ChangePasswordModal; 

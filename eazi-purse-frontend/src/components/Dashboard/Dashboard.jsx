@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -84,7 +83,7 @@ const Dashboard = () => {
             Welcome back, {user?.first_name || user?.username}!
           </h1>
           <p className="text-white/60 mt-2">
-            Here's your financial overview for today
+            Here&apos;s your financial overview for today
           </p>
         </div>
         <motion.div

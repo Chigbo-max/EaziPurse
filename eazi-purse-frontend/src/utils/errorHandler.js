@@ -6,7 +6,6 @@ export const parseErrorMessage = (error) => {
 
   const { data } = error;
   
-  // Handle different error response formats
   if (typeof data === 'string') {
     return data;
   }
@@ -19,7 +18,6 @@ export const parseErrorMessage = (error) => {
     return data.detail;
   }
   
-  // Handle field-specific errors (like validation errors)
   if (typeof data === 'object') {
     const errorMessages = [];
     
@@ -39,31 +37,26 @@ export const parseErrorMessage = (error) => {
     }
   }
   
-  // Handle non-field errors
   if (data.non_field_errors) {
     return data.non_field_errors.join('\n');
   }
   
-  // Fallback
   return 'An error occurred. Please try again.';
 };
 
-// Function to show multiple error messages
 export const showErrorMessages = (error, toast) => {
   const errorMessage = parseErrorMessage(error);
   
-  // Split by newlines and show each error separately
   const messages = errorMessage.split('\n');
   
   if (messages.length === 1) {
     toast.error(messages[0]);
   } else {
-    // Show the first error immediately, then others with a slight delay
     toast.error(messages[0]);
     messages.slice(1).forEach((message, index) => {
       setTimeout(() => {
         toast.error(message);
-      }, (index + 1) * 1000); // 1 second delay between messages
+      }, (index + 1) * 1000);
     });
   }
 }; 

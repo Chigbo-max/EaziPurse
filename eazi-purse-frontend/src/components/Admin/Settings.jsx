@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   CogIcon,
   BellIcon,
-  CurrencyDollarIcon,
   ServerIcon,
 } from '@heroicons/react/24/outline';
 import { useGetAdminSettingsQuery, useUpdateAdminSettingsMutation } from '../../store/apiSlice';
 
 const Settings = () => {
-  const { data: settingsData, isLoading } = useGetAdminSettingsQuery();
+  const { data: settingsData } = useGetAdminSettingsQuery();
   const [updateSettings] = useUpdateAdminSettingsMutation();
   
   const [settings, setSettings] = useState({

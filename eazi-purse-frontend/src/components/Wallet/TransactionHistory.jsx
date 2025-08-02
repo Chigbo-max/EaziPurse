@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,10 +8,8 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  FunnelIcon
 } from '@heroicons/react/24/outline';
 import { useGetTransactionsQuery } from '../../store/apiSlice';
-import toast from 'react-hot-toast';
 
 const TransactionHistory = () => {
   const navigate = useNavigate();
@@ -78,7 +76,7 @@ const TransactionHistory = () => {
   };
 
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new window.Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN'
     }).format(amount);

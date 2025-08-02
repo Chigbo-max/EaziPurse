@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MagnifyingGlassIcon,
@@ -17,7 +17,7 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   
-  const { data: usersData, isLoading, error } = useGetAdminUsersQuery({
+  const { data: usersData } = useGetAdminUsersQuery({
     search: searchTerm || undefined,
     status: filterStatus === 'all' ? undefined : filterStatus,
   });

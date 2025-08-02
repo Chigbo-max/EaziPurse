@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import PropTypes from 'prop-types';
 import { useGetLoginHistoryQuery } from '../../store/apiSlice';
 
 const LoginHistoryModal = ({ onClose }) => {
@@ -124,6 +124,10 @@ const LoginHistoryModal = ({ onClose }) => {
       </motion.div>
     </AnimatePresence>
   );
+};
+
+LoginHistoryModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default LoginHistoryModal; 

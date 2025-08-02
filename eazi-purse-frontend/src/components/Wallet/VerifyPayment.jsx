@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
@@ -9,7 +9,7 @@ import { showErrorMessages } from '../../utils/errorHandler';
 const VerifyPayment = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [verifyFund, { isLoading }] = useVerifyFundMutation();
+  const [verifyFund] = useVerifyFundMutation();
   const [verificationStatus, setVerificationStatus] = useState('verifying'); // 'verifying', 'success', 'error'
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const VerifyPayment = () => {
       }
 
       try {
-        const result = await verifyFund({ reference: reference || trxref }).unwrap();
+        await verifyFund({ reference: reference || trxref }).unwrap();
         setVerificationStatus('success');
         toast.success('Payment verified successfully!');
         

@@ -1,17 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ChartBarIcon,
   UsersIcon,
   CurrencyDollarIcon,
   CreditCardIcon,
   ArrowTrendingUpIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useGetAdminAnalyticsQuery } from '../../store/apiSlice';
 
@@ -39,14 +34,14 @@ const Analytics = () => {
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-NG', {
+    return new window.Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN'
     }).format(amount);
   };
 
   const formatNumber = (num) => {
-    return new Intl.NumberFormat('en-NG').format(num);
+    return new window.Intl.NumberFormat('en-NG').format(num);
   };
 
   const getGrowthIcon = (value) => {
@@ -317,7 +312,7 @@ const Analytics = () => {
       >
         <h2 className="text-xl font-bold text-white mb-6">Daily Activity (Last 7 Days)</h2>
         <div className="space-y-4">
-          {analyticsData?.daily_activity?.map((day, index) => (
+          {analyticsData?.daily_activity?.map((day) => (
             <div key={day.date} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
               <div>
                 <p className="text-white font-medium">
