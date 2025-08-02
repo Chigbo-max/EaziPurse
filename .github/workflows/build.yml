@@ -31,9 +31,9 @@ jobs:
     env:
       NODE_ENV: test
       DB_HOST: localhost
-      DB_PORT: 5432
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      POSTGRES_USER: ${{ secrets.DB_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_NAME: testdb
       JWT_SECRET: ${{ secrets.SECRET_KEY }}
       PAYSTACK_KEY: ${{ secrets.PAYSTACK_KEY }}
