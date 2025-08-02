@@ -31,11 +31,11 @@ jobs:
     env:
       NODE_ENV: test
       DB_HOST: localhost
-      DB_PORT: ${{ secrets.DB_PORT }}
-      POSTGRES_USER: ${{ secrets.DB_USER }}
-      POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_NAME: testdb
-      JWT_SECRET: ${{ secrets.SECRET_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
       PAYSTACK_KEY: ${{ secrets.PAYSTACK_KEY }}
       PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
       EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
@@ -69,6 +69,24 @@ jobs:
           cd WalletAppInDjango
           pipenv install --dev
 
+      - name: Create environment file for Django
+        run: |
+          cd WalletAppInDjango
+          cat > .env.development << EOF
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DB_NAME=testdb
+          DB_USER=postgres
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=localhost
+          DB_PORT=5432
+          PAYSTACK_KEY=${{ secrets.PAYSTACK_KEY }}
+          PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
+          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          EOF
+
       - name: Install frontend dependencies
         run: |
           cd eazi-purse-frontend
@@ -79,9 +97,60 @@ jobs:
           cd eazi-purse-frontend
           npm run lint
 
+      - name: Debug directory structure
+        run: |
+          pwd
+          ls -la
+          ls -la WalletAppInDjango/
+
+      - name: Test Django import
+        run: |
+          cd WalletAppInDjango
+          pipenv run python -c "
+          import os
+          import django
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eaziPurse.settings')
+          django.setup()
+          print('Django setup successful!')
+          "
+
+      - name: Wait for database
+        run: |
+          cd WalletAppInDjango
+          pipenv run python -c "
+          import time
+          import psycopg2
+          import os
+          
+          for i in range(30):
+              try:
+                  conn = psycopg2.connect(
+                      host='localhost',
+                      port='5432',
+                      database='testdb',
+                      user='postgres',
+                      password='${{ secrets.DB_PASSWORD }}'
+                  )
+                  conn.close()
+                  print('Database is ready!')
+                  break
+              except Exception as e:
+                  print(f'Waiting for database... ({i+1}/30)')
+                  time.sleep(2)
+          else:
+              raise Exception('Database connection failed after 30 attempts')
+          "
+
+      - name: Check Django configuration
+        run: |
+          cd WalletAppInDjango
+          pipenv run python manage.py check
+
       - name: Run backend tests
         run: |
           cd WalletAppInDjango
+          pwd
+          ls -la
           pipenv run python manage.py test
 
       - name: Run backend migrations
