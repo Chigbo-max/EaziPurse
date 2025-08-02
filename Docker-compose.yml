@@ -5,8 +5,8 @@ services:
     container_name: eazipurse_postgres
     environment:
       POSTGRES_DB: eazipurse_db
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres_migration.sql:/docker-entrypoint-initdb.d/init.sql
