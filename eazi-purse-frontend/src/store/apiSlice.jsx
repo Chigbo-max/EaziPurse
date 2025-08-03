@@ -177,6 +177,15 @@ export const apiSlice = createApi({
       invalidatesTags: ['AdminUsers'],
     }),
     
+    getAdminAnalytics: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params?.period) searchParams.append('period', params.period);
+        return `/user/admin/analytics/?${searchParams.toString()}`;
+      },
+      providesTags: ['AdminAnalytics'],
+    }),
+    
     getAdminSettings: builder.query({
       query: () => '/user/admin/settings/',
       providesTags: ['AdminSettings'],
@@ -210,6 +219,7 @@ export const {
   useTransferFundMutation,
   useGetTransactionsQuery,
   useGetAdminTransactionsQuery,
+  useGetAdminAnalyticsQuery,
   // Admin hooks
   useGetAdminDashboardQuery,
   useGetAdminUsersQuery,
