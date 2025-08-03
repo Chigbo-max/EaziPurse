@@ -30,11 +30,7 @@ jobs:
 
     env:
       NODE_ENV: test
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: testdb
+      DATABASE_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@localhost:5432/testdb
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       PAYSTACK_KEY: ${{ secrets.PAYSTACK_KEY }}
       PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
@@ -134,11 +130,7 @@ jobs:
           cd WalletAppInDjango
           cat > .env.development << EOF
           SECRET_KEY=${{ secrets.SECRET_KEY }}
-          DB_NAME=testdb
-          DB_USER=postgres
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_HOST=localhost
-          DB_PORT=5432
+          DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@localhost:5432/testdb
           PAYSTACK_KEY=${{ secrets.PAYSTACK_KEY }}
           PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
