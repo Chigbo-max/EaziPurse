@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-// Get token from localStorage
+const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
 const getToken = () => {
   const token = localStorage.getItem('access_token');
   return token ? `Bearer ${token}` : '';
@@ -183,13 +182,6 @@ export const apiSlice = createApi({
       providesTags: ['AdminSettings'],
     }),
     
-    getAdminAnalytics: builder.query({
-      query: (period = 'week') => `/user/admin/analytics/?period=${period}`,
-      providesTags: ['AdminAnalytics'],
-    }),
-    
-
-    
     updateAdminSettings: builder.mutation({
       query: (settings) => ({
         url: '/user/admin/settings/',
@@ -217,13 +209,10 @@ export const {
   useVerifyFundMutation,
   useTransferFundMutation,
   useGetTransactionsQuery,
-  useGetAdminTransactionsQuery,
-  
   // Admin hooks
   useGetAdminDashboardQuery,
   useGetAdminUsersQuery,
   useUpdateAdminUserMutation,
   useGetAdminSettingsQuery,
-      useUpdateAdminSettingsMutation,
-    useGetAdminAnalyticsQuery,
+  useUpdateAdminSettingsMutation,
 } = apiSlice; 
