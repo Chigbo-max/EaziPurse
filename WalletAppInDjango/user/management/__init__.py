@@ -1,1 +1,1 @@
-# Management commands directory 
+# User management package 

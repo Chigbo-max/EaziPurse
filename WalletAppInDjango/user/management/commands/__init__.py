@@ -1,1 +1,1 @@
-# Commands directory 
+# User commands package 

@@ -46,8 +46,6 @@ urlpatterns = [
        path('admin/', admin.site.urls),
         path('wallet/', include('wallet.urls')),
         path('user/', include('user.urls')),
-
-        # Include djoser URLs but exclude JWT endpoints (we have custom ones)
         path('auth/', include('djoser.urls')),
 
 # http://127.0.0.1:8000/api/docs/swagger/
