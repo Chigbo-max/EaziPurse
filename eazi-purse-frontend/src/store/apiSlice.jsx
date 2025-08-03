@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://eazipurse.onrender.com';
 const getToken = () => {
   const token = localStorage.getItem('access_token');
   return token ? `Bearer ${token}` : '';
