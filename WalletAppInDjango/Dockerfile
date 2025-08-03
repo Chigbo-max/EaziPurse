@@ -45,7 +45,7 @@ python manage.py migrate\n\
 echo "Generating account numbers for existing users..."\n\
 python manage.py generate_account_numbers\n\
 echo "Creating superuser if not exists..."\n\
-python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(is_superuser=True).exists() or User.objects.create_superuser(\"admin\", \"embracegod92@gmail.com\", \"admin123\")"\n\
+python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(email=\"embracegod92@gmail.com\").exists() or User.objects.create_superuser(\"embracegod92@gmail.com\", \"embracegod92@gmail.com\", \"admin123\")"\n\
 echo "Starting server..."\n\
 python manage.py runserver 0.0.0.0:8000\n\
 ' > /app/start.sh && chmod +x /app/start.sh
