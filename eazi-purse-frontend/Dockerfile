@@ -9,6 +9,9 @@ RUN npm ci
 
 COPY . .
 
+# Set default API URL for build
+ENV VITE_API_BASE_URL=/api
+
 # Build the application
 RUN npm run build
 

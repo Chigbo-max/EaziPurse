@@ -14,6 +14,9 @@ RUN npm ci
 # Copy source code
 COPY eazi-purse-frontend/ .
 
+# Set default API URL for build
+ENV VITE_API_BASE_URL=/api
+
 # Fix permissions for vite and build frontend
 RUN chmod +x node_modules/.bin/vite && npm run build
 
