@@ -38,5 +38,13 @@ USER appuser
 # Expose port 8000
 EXPOSE 8000
 
-# Run the application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Create a startup script
+RUN echo '#!/bin/bash\n\
+echo "Running database migrations..."\n\
+python manage.py migrate\n\
+echo "Starting server..."\n\
+python manage.py runserver 0.0.0.0:8000\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# Run the startup script
+CMD ["/app/start.sh"]
