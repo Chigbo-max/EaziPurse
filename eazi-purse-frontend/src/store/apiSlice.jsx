@@ -209,6 +209,7 @@ export const {
   useVerifyFundMutation,
   useTransferFundMutation,
   useGetTransactionsQuery,
+  useGetAdminTransactionsQuery,
   // Admin hooks
   useGetAdminDashboardQuery,
   useGetAdminUsersQuery,
