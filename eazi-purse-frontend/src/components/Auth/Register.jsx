@@ -46,8 +46,16 @@ const Register = () => {
     }
 
     try {
-      // eslint-disable-next-line no-unused-vars
-      const { confirmPassword, ...registerData } = formData;
+      // Prepare data for backend (convert confirmPassword to re_password)
+      const registerData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        re_password: formData.confirmPassword,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+      };
       await register(registerData).unwrap();
       
       const loginResult = await login({
