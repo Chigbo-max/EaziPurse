@@ -62,7 +62,7 @@ const ForgotPassword = () => {
             <h1 className="text-3xl font-bold text-white mb-2 font-display">
               Check Your Email
             </h1>
-            <p className="text-white/60">We've sent a password reset link to your email</p>
+            <p className="text-white/60">We&apos;ve sent a password reset link to your email</p>
           </div>
 
           <motion.div
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
           >
             <div className="text-center space-y-4">
               <p className="text-white/80">
-                We've sent a password reset link to <strong>{email}</strong>. 
+                We&apos;ve sent a password reset link to <strong>{email}</strong>. 
                 Please check your email and click the link to reset your password.
               </p>
               
@@ -140,7 +140,7 @@ const ForgotPassword = () => {
           </h2>
 
           <p className="text-white/60 text-center mb-6">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
