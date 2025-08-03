@@ -1,6 +1,22 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://eazipurse.onrender.com';
+// Determine the base URL based on the current environment
+const getBaseUrl = () => {
+  // If we're in development and have the env var, use it
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // If we're on the deployed frontend domain, use the backend URL
+  if (window.location.hostname === 'eazipurse-ng.onrender.com') {
+    return 'https://eazipurse.onrender.com';
+  }
+  
+  // For local development, use the proxy
+  return '/api';
+};
+
+const baseUrl = getBaseUrl();
 const getToken = () => {
   const token = localStorage.getItem('access_token');
   return token ? `Bearer ${token}` : '';
