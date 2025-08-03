@@ -45,7 +45,7 @@ python manage.py migrate\n\
 echo "Generating account numbers for existing users..."\n\
 python manage.py generate_account_numbers\n\
 echo "Creating superuser if not exists..."\n\
-python manage.py create_superuser --email=embracegod92@gmail.com --password=admin123\n\
+python manage.py fix_superuser\n\
 echo "Starting server..."\n\
 python manage.py runserver 0.0.0.0:8000\n\
 ' > /app/start.sh && chmod +x /app/start.sh
