@@ -69,7 +69,7 @@ def fund_wallet(request):
             "amount": amount,
             "reference": reference,
             "email": email,
-            "callback_url": "http://localhost:5173/wallet/verify"
+            "callback_url": "https://eazipurse-ng.onrender.com/wallet/verify"
         }
 
         response_str = requests.post(url=url, json=data, headers=headers)

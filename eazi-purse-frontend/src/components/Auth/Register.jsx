@@ -46,12 +46,11 @@ const Register = () => {
     }
 
     try {
-      // Prepare data for backend (convert confirmPassword to re_password)
+      // Prepare data for backend
       const registerData = {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        re_password: formData.confirmPassword,
         first_name: formData.first_name,
         last_name: formData.last_name,
         phone: formData.phone,

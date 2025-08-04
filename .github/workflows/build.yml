@@ -130,7 +130,7 @@ jobs:
           cd WalletAppInDjango
           cat > .env.development << EOF
           SECRET_KEY=${{ secrets.SECRET_KEY }}
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD }}@localhost:5432/testdb
           PAYSTACK_KEY=${{ secrets.PAYSTACK_KEY }}
           PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
