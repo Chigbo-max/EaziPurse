@@ -58,8 +58,22 @@ class ProfileViewSet(ModelViewSet):
 
     def get_object(self):
         # Get or create profile for the current user
-        profile, created = Profile.objects.get_or_create(user=self.request.user)
-        return profile
+        try:
+            profile, created = Profile.objects.get_or_create(user=self.request.user)
+            return profile
+        except Exception as e:
+            # If there's a constraint violation, try to get existing profile
+            try:
+                profile = Profile.objects.get(user=self.request.user)
+                return profile
+            except Profile.DoesNotExist:
+                # Create a new profile with empty NIN/BVN
+                profile = Profile.objects.create(
+                    user=self.request.user,
+                    nin=None,
+                    bvn=None
+                )
+                return profile
 
 class ProfileUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -67,8 +81,22 @@ class ProfileUpdateView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         # Get or create profile for the current user
-        profile, created = Profile.objects.get_or_create(user=self.request.user)
-        return profile
+        try:
+            profile, created = Profile.objects.get_or_create(user=self.request.user)
+            return profile
+        except Exception as e:
+            # If there's a constraint violation, try to get existing profile
+            try:
+                profile = Profile.objects.get(user=self.request.user)
+                return profile
+            except Profile.DoesNotExist:
+                # Create a new profile with empty NIN/BVN
+                profile = Profile.objects.create(
+                    user=self.request.user,
+                    nin=None,
+                    bvn=None
+                )
+                return profile
 
     def perform_update(self, serializer):
         try:

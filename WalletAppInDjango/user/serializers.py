@@ -30,6 +30,11 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         if User.objects.filter(phone=attrs['phone']).exists():
             raise serializers.ValidationError("A user with this phone number already exists.")
         
+        # Check if username already exists (if provided)
+        username = attrs.get('username')
+        if username and User.objects.filter(username=username).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        
         # Validate phone number format (should be 11 digits starting with 0)
         phone = attrs.get('phone', '')
         if not phone.startswith('0') or len(phone) != 11 or not phone.isdigit():
@@ -129,8 +134,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    bvn = serializers.CharField(max_length=11, min_length=11)
-    nin = serializers.CharField(max_length=11, min_length=11)
+    bvn = serializers.CharField(max_length=11, min_length=11, required=False, allow_blank=True)
+    nin = serializers.CharField(max_length=11, min_length=11, required=False, allow_blank=True)
     
     class Meta:
         model = Profile
@@ -138,12 +143,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
     
     def validate_bvn(self, value):
+        if not value:  # Allow empty BVN
+            return value
         # Check if BVN is already used by another user
         if Profile.objects.filter(bvn=value).exclude(user=self.context['request'].user).exists():
             raise serializers.ValidationError('This BVN is already registered with another account.')
         return value
     
     def validate_nin(self, value):
+        if not value:  # Allow empty NIN
+            return value
         # Check if NIN is already used by another user
         if Profile.objects.filter(nin=value).exclude(user=self.context['request'].user).exists():
             raise serializers.ValidationError('This NIN is already registered with another account.')
