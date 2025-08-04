@@ -13,25 +13,42 @@ User = get_user_model()
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'email', 'username', 'password', 'first_name', 'last_name', 'phone')
+        fields = ('id', 'email', 'username', 'password', 're_password', 'first_name', 'last_name', 'phone')
     
     def create(self, validated_data):
+        # Remove re_password from validated_data as it's not a model field
+        validated_data.pop('re_password', None)
         
-        # Create user with all fields explicitly
-        user = User.objects.create_user(
-            email=validated_data.get('email'),
-            password=validated_data.get('password'),
-            username=validated_data.get('username'),
-        )
-        
-        # Set additional fields after creation
-        user.first_name = validated_data.get('first_name', '')
-        user.last_name = validated_data.get('last_name', '')
-        user.phone = validated_data.get('phone', '')
-        user.is_active = True  
-        user.save()
-        
-        return user
+        try:
+            # Generate username from first_name if not provided
+            username = validated_data.get('username')
+            if not username and validated_data.get('first_name'):
+                base_username = validated_data.get('first_name').lower().replace(' ', '')
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+            
+            # Create user with all fields explicitly
+            user = User.objects.create_user(
+                email=validated_data.get('email'),
+                password=validated_data.get('password'),
+                username=username or validated_data.get('email'),  # Fallback to email if no username
+            )
+            
+            # Set additional fields after creation
+            user.first_name = validated_data.get('first_name', '')
+            user.last_name = validated_data.get('last_name', '')
+            user.phone = validated_data.get('phone', '')
+            user.is_active = True  
+            user.save()
+            
+            return user
+        except Exception as e:
+            # Log the error for debugging
+            print(f"Error creating user: {e}")
+            raise serializers.ValidationError(f"Unable to create account: {str(e)}")
 
 class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):

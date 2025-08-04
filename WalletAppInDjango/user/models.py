@@ -9,6 +9,18 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
+        
+        # Generate username from first_name if not provided
+        username = extra_fields.get('username')
+        if not username and extra_fields.get('first_name'):
+            base_username = extra_fields.get('first_name').lower().replace(' ', '')
+            username = base_username
+            counter = 1
+            while self.model.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            extra_fields['username'] = username
+        
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -18,7 +30,16 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('phone', '08000000000')  # Add default phone
-        extra_fields.setdefault('username', email)  # Set username to email
+        
+        # Generate username from first_name or use 'admin'
+        username = extra_fields.get('username')
+        if not username:
+            if extra_fields.get('first_name'):
+                username = extra_fields.get('first_name').lower().replace(' ', '')
+            else:
+                username = 'admin'
+        
+        extra_fields.setdefault('username', username)
         return self.create_user(email, password, **extra_fields)
 
 
@@ -44,9 +65,19 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
     
     def save(self, *args, **kwargs):
-        # Ensure email is set as username if not provided
-        if not self.username and self.email:
-            self.username = self.email
+        # Ensure username is set to first_name if not provided, fallback to email
+        if not self.username:
+            if self.first_name:
+                # Use first_name as username, make it unique if needed
+                base_username = self.first_name.lower().replace(' ', '')
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exclude(pk=self.pk).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                self.username = username
+            elif self.email:
+                self.username = self.email
         super().save(*args, **kwargs)
     
     @property
