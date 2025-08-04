@@ -10,11 +10,14 @@ import string
 @receiver(post_save,sender=settings.AUTH_USER_MODEL)
 def create_wallet(sender, instance, created, **kwargs):
     if created:
+        print(f"Creating wallet for user: {instance.email}")
+        
         # Generate account number from phone number (remove first digit)
         def generate_account_number_from_phone():
             if instance.phone and len(instance.phone) >= 11:
                 # Remove the first digit (0) from phone number
                 account_number = instance.phone[1:]
+                print(f"Generated account number from phone: {account_number}")
                 
                 # Check if it's unique, if not, add a random suffix
                 if not Wallet.objects.filter(account_number=account_number).exists():
@@ -22,15 +25,25 @@ def create_wallet(sender, instance, created, **kwargs):
                 else:
                     # If not unique, add a random 2-digit suffix
                     suffix = ''.join(random.choices(string.digits, k=2))
-                    return f"{account_number}{suffix}"
+                    final_account = f"{account_number}{suffix}"
+                    print(f"Account number with suffix: {final_account}")
+                    return final_account
             else:
                 # Fallback: generate random 10-digit number if phone is invalid
                 while True:
                     account_number = '1' + ''.join(random.choices(string.digits, k=9))
                     if not Wallet.objects.filter(account_number=account_number).exists():
+                        print(f"Generated random account number: {account_number}")
                         return account_number
         
-        Wallet.objects.create(
-            user=instance,
-            account_number=generate_account_number_from_phone()
-        )
+        try:
+            account_number = generate_account_number_from_phone()
+            wallet = Wallet.objects.create(
+                user=instance,
+                account_number=account_number
+            )
+            print(f"Wallet created successfully: {wallet.account_number}")
+        except Exception as e:
+            print(f"Error creating wallet: {e}")
+            import traceback
+            traceback.print_exc()

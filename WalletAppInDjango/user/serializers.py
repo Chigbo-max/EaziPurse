@@ -76,6 +76,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             user.save()
             
             print(f"User saved successfully: {user.email}")
+            print(f"Wallet creation signal should trigger now...")
             return user
         except Exception as e:
             # Log the error for debugging
