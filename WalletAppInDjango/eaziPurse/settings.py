@@ -139,14 +139,6 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,  # Disabled for development
     'SEND_PASSWORD_RESET_EMAIL': True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
-    'EMAIL': {
-        'password_reset': 'user.email.CustomPasswordResetEmail',
-        'password_reset_confirm': 'user.email.CustomPasswordResetEmail',
-    },
-    'TEMPLATES': {
-        'password_reset': 'email/password_reset_email.html',
-        'password_reset_confirm': 'email/password_reset_email.html',
-    },
     'SERIALIZERS': {
         'user_create': 'user.serializers.CustomUserCreateSerializer',
         'user': 'user.serializers.CustomUserSerializer',
