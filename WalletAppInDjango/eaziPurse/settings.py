@@ -133,12 +133,16 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': 'reset-password?uid={uid}&token={token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'https://eazipurse-ng.onrender.com/reset-password?uid={uid}&token={token}',
     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': '#/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': False,  # Disabled for development
     'SEND_PASSWORD_RESET_EMAIL': True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    'EMAIL': {
+        'password_reset': 'email/password_reset_email.html',
+        'password_reset_confirm': 'email/password_reset_email.html',
+    },
     'SERIALIZERS': {
         'user_create': 'user.serializers.CustomUserCreateSerializer',
         'user': 'user.serializers.CustomUserSerializer',

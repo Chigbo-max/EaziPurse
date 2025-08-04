@@ -4,7 +4,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     CustomTokenObtainPairView, ProfileViewSet, ProfileUpdateView, DashboardView, 
     UserDetailView, ChangePasswordView, LoginHistoryView,
-    AdminDashboardView, AdminUsersView, AdminUserDetailView, AdminSettingsView, AdminAnalyticsView, AdminReportDownloadView
+    AdminDashboardView, AdminUsersView, AdminUserDetailView, AdminSettingsView, AdminAnalyticsView, AdminReportDownloadView,
+    CustomPasswordResetView
 )
 
 router = DefaultRouter()
@@ -17,6 +18,7 @@ urlpatterns = [
     path('profile/', ProfileUpdateView.as_view(), name='profile-update'),
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('login-history/', LoginHistoryView.as_view(), name='login-history'),
+    path('password-reset/', CustomPasswordResetView.as_view(), name='custom-password-reset'),
     path('', include(router.urls)),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     

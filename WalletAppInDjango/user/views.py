@@ -3,7 +3,7 @@ from django.views.generic import CreateView
 from django.http import HttpResponse
 from rest_framework import mixins, request, generics, viewsets
 from rest_framework.generics import CreateAPIView, get_object_or_404, RetrieveAPIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -23,6 +23,15 @@ from django.db.models import Sum, Q
 from wallet.models import Transaction, Wallet
 from .serializers import LoginHistorySerializer, AdminDashboardSerializer, AdminUserSerializer, AdminSettingsSerializer
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ProfileViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -746,3 +755,68 @@ class AdminReportDownloadView(generics.CreateAPIView):
             import traceback
             traceback.print_exc()
             return Response({"error": f"Failed to generate report: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CustomPasswordResetView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({'error': 'Email is required'}, status=400)
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate password reset token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Create reset URL
+            reset_url = f"https://eazipurse-ng.onrender.com/reset-password?uid={uid}&token={token}"
+            
+            # Send email
+            subject = 'Password Reset - EaziPurse'
+            html_message = render_to_string('email/password_reset_email.html', {
+                'user': user,
+                'protocol': 'https',
+                'domain': 'eazipurse-ng.onrender.com',
+                'uid': uid,
+                'token': token,
+            })
+            
+            plain_message = render_to_string('email/password_reset_email.txt', {
+                'user': user,
+                'protocol': 'https',
+                'domain': 'eazipurse-ng.onrender.com',
+                'uid': uid,
+                'token': token,
+            })
+            
+            # Log email attempt
+            logger.info(f"Attempting to send password reset email to {email}")
+            logger.info(f"Reset URL: {reset_url}")
+            
+            send_mail(
+                subject=subject,
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            
+            logger.info(f"Password reset email sent successfully to {email}")
+            
+            return Response({
+                'message': 'Password reset email sent successfully',
+                'email': email
+            }, status=200)
+            
+        except User.DoesNotExist:
+            logger.warning(f"Password reset attempted for non-existent email: {email}")
+            return Response({'error': 'User with this email does not exist'}, status=404)
+        except Exception as e:
+            logger.error(f"Error sending password reset email to {email}: {str(e)}")
+            return Response({'error': 'Failed to send password reset email'}, status=500)
