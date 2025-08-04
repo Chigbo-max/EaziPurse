@@ -325,12 +325,10 @@ def admin_transaction_history(request):
         )
     
     try:
-        # Get all transactions with sender and receiver details
         transactions = Transaction.objects.select_related(
             'sender', 'receiver'
         ).order_by('-transaction_time')
         
-        # Apply filters
         filter_type = request.GET.get('filter', 'all')
         if filter_type == 'deposits':
             transactions = transactions.filter(transaction_type='D')
