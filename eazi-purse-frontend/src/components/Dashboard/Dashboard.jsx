@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   CreditCardIcon,
   UserIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faNairaSign } from '@fortawesome/free-solid-svg-icons';
 import { useGetDashboardQuery } from '../../store/apiSlice';
 
 const Dashboard = () => {
@@ -41,7 +42,7 @@ const Dashboard = () => {
     {
       name: 'Current Balance',
       value: `₦${wallet?.balance || '0.00'}`,
-      icon: CurrencyDollarIcon,
+      icon: () => <FontAwesomeIcon icon={faNairaSign} className="w-6 h-6 text-primary-400" />,
       color: 'primary',
       gradient: 'card-gradient',
     },
@@ -126,7 +127,7 @@ const Dashboard = () => {
                 <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
               <div className={`w-12 h-12 bg-${stat.color}-500/20 rounded-full flex items-center justify-center`}>
-                <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
+                {typeof stat.icon === 'function' ? stat.icon() : <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />}
               </div>
             </div>
           </motion.div>
@@ -241,7 +242,7 @@ const Dashboard = () => {
           </div>
           <div className="text-center">
             <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <ChartBarIcon className="w-8 h-8 text-primary-400" />
+              <FontAwesomeIcon icon={faNairaSign} className="w-8 h-8 text-primary-400" />
             </div>
             <h3 className="text-lg font-semibold text-white mb-1">Transaction Volume</h3>
             <p className="text-primary-400 font-medium">
