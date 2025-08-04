@@ -189,34 +189,44 @@ const Dashboard = () => {
         >
           <h2 className="text-xl font-bold text-white mb-4">Latest Transactions</h2>
           <div className="space-y-4">
-            {recentTransactions.map((transaction) => (
-              <motion.div
-                key={transaction.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between p-4 bg-white/5 rounded-xl"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    transaction.type === 'Deposit' ? 'bg-success-500/20' : 'bg-warning-500/20'
-                  }`}>
-                    {transaction.type === 'Deposit' ? (
-                      <ArrowTrendingUpIcon className="w-5 h-5 text-success-400" />
-                    ) : (
-                      <ArrowTrendingDownIcon className="w-5 h-5 text-warning-400" />
-                    )}
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((transaction) => (
+                <motion.div
+                  key={transaction.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center justify-between p-4 bg-white/5 rounded-xl"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      transaction.type === 'Deposit' ? 'bg-success-500/20' : 'bg-warning-500/20'
+                    }`}>
+                      {transaction.type === 'Deposit' ? (
+                        <ArrowTrendingUpIcon className="w-5 h-5 text-success-400" />
+                      ) : (
+                        <ArrowTrendingDownIcon className="w-5 h-5 text-warning-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">{transaction.type}</p>
+                      <p className="text-sm text-white/60">{transaction.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white font-medium">{transaction.type}</p>
-                    <p className="text-sm text-white/60">{transaction.date}</p>
+                  <div className="text-right">
+                    <p className="text-white font-medium">{transaction.amount}</p>
+                    <p className="text-sm text-success-400">{transaction.status}</p>
                   </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ChartBarIcon className="w-8 h-8 text-white/40" />
                 </div>
-                <div className="text-right">
-                  <p className="text-white font-medium">{transaction.amount}</p>
-                  <p className="text-sm text-success-400">{transaction.status}</p>
-                </div>
-              </motion.div>
-            ))}
+                <p className="text-white/60 mb-2">No transactions yet</p>
+                <p className="text-sm text-white/40">Your transaction history will appear here</p>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -254,9 +264,11 @@ const Dashboard = () => {
             <div className="w-16 h-16 bg-warning-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
               <CreditCardIcon className="w-8 h-8 text-warning-400" />
             </div>
-            <h3 className="text-lg font-semibold text-white mb-1">Active Cards</h3>
-            <p className="text-warning-400 font-medium">1</p>
-            <p className="text-sm text-white/60">Linked accounts</p>
+            <h3 className="text-lg font-semibold text-white mb-1">Total Transactions</h3>
+            <p className="text-warning-400 font-medium">
+              {dashboardData?.total_transactions || '0'}
+            </p>
+            <p className="text-sm text-white/60">All time</p>
           </div>
         </div>
       </motion.div>

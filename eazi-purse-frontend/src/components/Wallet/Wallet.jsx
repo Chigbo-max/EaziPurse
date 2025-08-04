@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  CurrencyDollarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   CreditCardIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faNairaSign } from '@fortawesome/free-solid-svg-icons';
 import { useGetDashboardQuery } from '../../store/apiSlice';
 
 const Wallet = () => {
@@ -82,7 +83,7 @@ const Wallet = () => {
               </h2>
             </div>
             <div className="w-16 h-16 bg-gold-500/20 rounded-full flex items-center justify-center">
-              <CurrencyDollarIcon className="w-8 h-8 text-gold-400" />
+              <FontAwesomeIcon icon={faNairaSign} className="w-8 h-8 text-gold-400" />
             </div>
           </div>
           
@@ -136,39 +137,50 @@ const Wallet = () => {
         transition={{ delay: 0.4 }}
         className="card-gradient p-6 rounded-2xl"
       >
-        <h2 className="text-xl font-bold text-white mb-6">Sample Activity</h2>
+        <h2 className="text-xl font-bold text-white mb-6">Recent Activity</h2>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-success-500/20 rounded-full flex items-center justify-center">
-                <ArrowDownIcon className="w-5 h-5 text-success-400" />
+          {dashboardData?.recent_transactions && dashboardData.recent_transactions.length > 0 ? (
+            dashboardData.recent_transactions.map((transaction) => (
+              <motion.div
+                key={transaction.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between p-4 bg-white/5 rounded-xl"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    transaction.type === 'Deposit' ? 'bg-success-500/20' : 'bg-warning-500/20'
+                  }`}>
+                    {transaction.type === 'Deposit' ? (
+                      <ArrowDownIcon className="w-5 h-5 text-success-400" />
+                    ) : (
+                      <ArrowUpIcon className="w-5 h-5 text-warning-400" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{transaction.type}</p>
+                    <p className="text-sm text-white/60">{transaction.date}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-semibold ${
+                    transaction.type === 'Deposit' ? 'text-success-400' : 'text-warning-400'
+                  }`}>
+                    {transaction.amount}
+                  </p>
+                  <p className="text-sm text-white/60">{transaction.status}</p>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ClockIcon className="w-8 h-8 text-white/40" />
               </div>
-              <div>
-                <p className="text-white font-medium">Wallet Funded</p>
-                <p className="text-sm text-white/60">Today, 2:30 PM</p>
-              </div>
+              <p className="text-white/60 mb-2">No recent activity</p>
+              <p className="text-sm text-white/40">Your transaction history will appear here</p>
             </div>
-            <div className="text-right">
-              <p className="text-success-400 font-semibold">+₦50,000</p>
-              <p className="text-sm text-white/60">Completed</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-warning-500/20 rounded-full flex items-center justify-center">
-                <ArrowUpIcon className="w-5 h-5 text-warning-400" />
-              </div>
-              <div>
-                <p className="text-white font-medium">Transfer to John</p>
-                <p className="text-sm text-white/60">Yesterday, 4:15 PM</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-warning-400 font-semibold">-₦25,000</p>
-              <p className="text-sm text-white/60">Completed</p>
-            </div>
-          </div>
+          )}
         </div>
       </motion.div>
 
