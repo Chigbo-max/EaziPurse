@@ -50,7 +50,7 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/auth/users/reset_password_confirm/', {
+      const response = await fetch('https://eazipurse.onrender.com/auth/users/reset_password_confirm/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
