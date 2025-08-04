@@ -14,15 +14,15 @@ class Command(BaseCommand):
         
         # Test cases
         test_cases = [
-            "09012345123",  # Should become: 9012345123
-            "08064042241",  # Should become: 8064042241
-            "07098765432",  # Should become: 7098765432
-            "08123456789",  # Should become: 8123456789
+            "09012345123",  
+            "08064042241",  
+            "07098765432",  
+            "08123456789", 
         ]
         
         print("Testing account number generation logic:")
         for phone in test_cases:
-            expected = phone[1:]  # Remove first digit
+            expected = phone[1:]  
             print(f"Phone: {phone} → Account: {expected}")
         
         print("\n" + "=" * 60)

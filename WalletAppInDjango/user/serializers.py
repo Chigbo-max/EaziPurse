@@ -15,7 +15,32 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         model = User
         fields = ('id', 'email', 'username', 'password', 're_password', 'first_name', 'last_name', 'phone')
     
+    def validate(self, attrs):
+        print(f"Validating attrs: {attrs}")
+        
+        # Validate password confirmation
+        if attrs['password'] != attrs['re_password']:
+            raise serializers.ValidationError("Passwords don't match.")
+        
+        # Check if email already exists
+        if User.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        
+        # Check if phone already exists
+        if User.objects.filter(phone=attrs['phone']).exists():
+            raise serializers.ValidationError("A user with this phone number already exists.")
+        
+        # Validate phone number format (should be 11 digits starting with 0)
+        phone = attrs.get('phone', '')
+        if not phone.startswith('0') or len(phone) != 11 or not phone.isdigit():
+            raise serializers.ValidationError("Phone number must be 11 digits starting with 0.")
+        
+        print(f"Validation passed for: {attrs['email']}")
+        return attrs
+    
     def create(self, validated_data):
+        print(f"Creating user with data: {validated_data}")
+        
         # Remove re_password from validated_data as it's not a model field
         validated_data.pop('re_password', None)
         
@@ -30,12 +55,16 @@ class CustomUserCreateSerializer(UserCreateSerializer):
                     username = f"{base_username}{counter}"
                     counter += 1
             
+            print(f"Generated username: {username}")
+            
             # Create user with all fields explicitly
             user = User.objects.create_user(
                 email=validated_data.get('email'),
                 password=validated_data.get('password'),
                 username=username or validated_data.get('email'),  # Fallback to email if no username
             )
+            
+            print(f"User created with ID: {user.id}")
             
             # Set additional fields after creation
             user.first_name = validated_data.get('first_name', '')
@@ -44,10 +73,13 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             user.is_active = True  
             user.save()
             
+            print(f"User saved successfully: {user.email}")
             return user
         except Exception as e:
             # Log the error for debugging
             print(f"Error creating user: {e}")
+            import traceback
+            traceback.print_exc()
             raise serializers.ValidationError(f"Unable to create account: {str(e)}")
 
 class CustomUserSerializer(UserSerializer):
