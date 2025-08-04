@@ -10,6 +10,8 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faNairaSign } from '@fortawesome/free-solid-svg-icons';
 import { logout } from '../../store/authSlice';
 import { selectCurrentUser } from '../../store/authSlice';
 
@@ -47,7 +49,7 @@ const Layout = () => {
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold text-white">₦</span>
+                <FontAwesomeIcon icon={faNairaSign} className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold text-white">EaziPurse</span>
             </div>
@@ -58,17 +60,18 @@ const Layout = () => {
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
-
+          
           <nav className="mt-8 px-4">
             <div className="space-y-2">
               {navigation.map((item) => (
                 <motion.a
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive(item.href)
                       ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
                       : 'text-white/60 hover:text-white hover:bg-white/5'
-                    }`}
+                  }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -77,7 +80,7 @@ const Layout = () => {
                 </motion.a>
               ))}
             </div>
-
+            
             <div className="mt-8 pt-8 border-t border-white/10">
               <div className="px-4 py-3">
                 <p className="text-sm text-white/60">Welcome back,</p>
@@ -98,33 +101,24 @@ const Layout = () => {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-dark-800/95 backdrop-blur-md border-r border-white/10">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24">
-              <text
-                x="12"
-                y="16"
-                textAnchor="middle"
-                fontSize="16"
-                fill="currentColor"
-                fontFamily="Arial, sans-serif"
-              >
-                ₦
-              </text>
-            </svg>
+          <div className="flex items-center space-x-3 p-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+              <FontAwesomeIcon icon={faNairaSign} className="w-6 h-6 text-white" />
+            </div>
             <span className="text-xl font-bold text-white">EaziPurse</span>
           </div>
-
-
+          
           <nav className="flex-1 px-4 mt-8">
             <div className="space-y-2">
               {navigation.map((item) => (
                 <motion.a
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive(item.href)
                       ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
                       : 'text-white/60 hover:text-white hover:bg-white/5'
-                    }`}
+                  }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -133,7 +127,7 @@ const Layout = () => {
                 </motion.a>
               ))}
             </div>
-
+            
             <div className="mt-8 pt-8 border-t border-white/10">
               <div className="px-4 py-3">
                 <p className="text-sm text-white/60">Welcome back,</p>
@@ -161,12 +155,12 @@ const Layout = () => {
           >
             <Bars3Icon className="w-6 h-6" />
           </button>
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-              <span className="text-lg font-bold text-white">₦</span>
+                      <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faNairaSign} className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">EaziPurse</span>
             </div>
-            <span className="text-lg font-bold text-white">EaziPurse</span>
-          </div>
           <div className="w-6" />
         </div>
 
