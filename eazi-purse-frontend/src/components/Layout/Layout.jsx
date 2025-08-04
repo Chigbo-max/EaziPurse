@@ -6,7 +6,7 @@ import {
   HomeIcon,
   UserIcon,
   CreditCardIcon,
-  ArrowRightOnRectangleIcon,
+  ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -58,18 +58,17 @@ const Layout = () => {
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
-          
+
           <nav className="mt-8 px-4">
             <div className="space-y-2">
               {navigation.map((item) => (
                 <motion.a
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.href)
                       ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
                       : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -78,7 +77,7 @@ const Layout = () => {
                 </motion.a>
               ))}
             </div>
-            
+
             <div className="mt-8 pt-8 border-t border-white/10">
               <div className="px-4 py-3">
                 <p className="text-sm text-white/60">Welcome back,</p>
@@ -88,7 +87,7 @@ const Layout = () => {
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <ArrowLeftStartOnRectangleIcon className="w-5 h-5" />
                 <span>Sign out</span>
               </button>
             </div>
@@ -99,26 +98,33 @@ const Layout = () => {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-dark-800/95 backdrop-blur-md border-r border-white/10">
-          <div className="flex items-center space-x-3 p-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24">
+              <text
+                x="12"
+                y="16"
+                textAnchor="middle"
+                fontSize="16"
+                fill="currentColor"
+                fontFamily="Arial, sans-serif"
+              >
+                ₦
+              </text>
+            </svg>
             <span className="text-xl font-bold text-white">EaziPurse</span>
           </div>
-          
+
+
           <nav className="flex-1 px-4 mt-8">
             <div className="space-y-2">
               {navigation.map((item) => (
                 <motion.a
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.href)
                       ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
                       : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -127,7 +133,7 @@ const Layout = () => {
                 </motion.a>
               ))}
             </div>
-            
+
             <div className="mt-8 pt-8 border-t border-white/10">
               <div className="px-4 py-3">
                 <p className="text-sm text-white/60">Welcome back,</p>
@@ -137,7 +143,7 @@ const Layout = () => {
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <ArrowLeftStartOnRectangleIcon className="w-5 h-5" />
                 <span>Sign out</span>
               </button>
             </div>
@@ -155,12 +161,12 @@ const Layout = () => {
           >
             <Bars3Icon className="w-6 h-6" />
           </button>
-                      <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-white">₦</span>
-              </div>
-              <span className="text-lg font-bold text-white">EaziPurse</span>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+              <span className="text-lg font-bold text-white">₦</span>
             </div>
+            <span className="text-lg font-bold text-white">EaziPurse</span>
+          </div>
           <div className="w-6" />
         </div>
 
