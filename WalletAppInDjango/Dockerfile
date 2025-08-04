@@ -42,8 +42,8 @@ EXPOSE 8000
 RUN echo '#!/bin/bash\n\
 echo "Running database migrations..."\n\
 python manage.py migrate\n\
-echo "Generating account numbers for existing users..."\n\
-python manage.py generate_account_numbers\n\
+echo "Ensuring admin wallets are preserved..."\n\
+python manage.py ensure_admin_wallet\n\
 echo "Creating superuser if not exists..."\n\
 python manage.py fix_superuser\n\
 echo "Fixing usernames for existing users..."\n\

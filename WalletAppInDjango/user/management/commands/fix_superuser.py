@@ -12,11 +12,32 @@ class Command(BaseCommand):
         password = 'admin123'
         
         try:
-            # Delete existing user if exists
-            User.objects.filter(email=email).delete()
-            self.stdout.write(f'Deleted existing user: {email}')
+            # Check if superuser already exists
+            existing_user = User.objects.filter(email=email).first()
             
-            # Create new superuser
+            if existing_user:
+                self.stdout.write(f'Superuser already exists: {email}')
+                self.stdout.write(self.style.SUCCESS(
+                    f'Existing superuser details:\n'
+                    f'Email: {existing_user.email}\n'
+                    f'Username: {existing_user.username}\n'
+                    f'Phone: {existing_user.phone}\n'
+                    f'Is Superuser: {existing_user.is_superuser}\n'
+                    f'Is Staff: {existing_user.is_staff}\n'
+                    f'Is Active: {existing_user.is_active}\n'
+                    f'Account Status: {existing_user.account_status}\n'
+                    f'User ID: {existing_user.id}'
+                ))
+                
+                # Test authentication with existing user
+                authenticated_user = authenticate(email=email, password=password)
+                if authenticated_user:
+                    self.stdout.write(self.style.SUCCESS('✅ Authentication successful with existing user!'))
+                else:
+                    self.stdout.write(self.style.WARNING('⚠️  Authentication failed with existing user. Password might be different.'))
+                return
+            
+            # Create new superuser only if it doesn't exist
             with transaction.atomic():
                 user = User.objects.create_superuser(
                     email=email,
