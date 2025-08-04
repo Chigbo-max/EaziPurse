@@ -10,6 +10,10 @@ export default defineConfig({
         target: 'https://eazipurse.onrender.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/auth': {
+        target: 'https://eazipurse.onrender.com',
+        changeOrigin: true
       }
     }
   },
