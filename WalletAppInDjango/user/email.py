@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CustomPasswordResetEmail(PasswordResetEmail):
-    template_name = "email/password_reset_email.html"
+    template_name = "djoser/email/password_reset_email.html"
     
     def get_context_data(self):
         context = super().get_context_data()
@@ -27,7 +27,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
             html_message = render_to_string(self.template_name, context)
             
             # Render plain text email
-            text_message = render_to_string('email/password_reset_email.txt', context)
+            text_message = render_to_string('djoser/email/password_reset_email.txt', context)
             
             # Send email
             send_mail(
