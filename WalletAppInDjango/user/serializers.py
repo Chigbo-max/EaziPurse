@@ -11,18 +11,16 @@ from .models import Profile, AdminSettings
 User = get_user_model()
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    re_password = serializers.CharField(write_only=True)
     
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'email', 'username', 'password', 're_password', 'first_name', 'last_name', 'phone')
+        fields = ('id', 'email', 'username', 'password', 'first_name', 'last_name', 'phone')
     
     def validate(self, attrs):
         print(f"Validating attrs: {attrs}")
         
-        # Validate password confirmation
-        if attrs['password'] != attrs['re_password']:
-            raise serializers.ValidationError("Passwords don't match.")
+        # Let Djoser handle password confirmation validation
+        # We'll add our custom validations after Djoser's validation
         
         # Check if email already exists
         if User.objects.filter(email=attrs['email']).exists():
@@ -43,9 +41,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     def create(self, validated_data):
         print(f"Creating user with data: {validated_data}")
         
-        # Remove re_password from validated_data as it's not a model field
-        validated_data.pop('re_password', None)
-        
         try:
             # Generate username from first_name if not provided
             username = validated_data.get('username')
@@ -64,17 +59,12 @@ class CustomUserCreateSerializer(UserCreateSerializer):
                 email=validated_data.get('email'),
                 password=validated_data.get('password'),
                 username=username or validated_data.get('email'),  # Fallback to email if no username
+                first_name=validated_data.get('first_name', ''),
+                last_name=validated_data.get('last_name', ''),
+                phone=validated_data.get('phone', ''),
             )
             
             print(f"User created with ID: {user.id}")
-            
-            # Set additional fields after creation
-            user.first_name = validated_data.get('first_name', '')
-            user.last_name = validated_data.get('last_name', '')
-            user.phone = validated_data.get('phone', '')
-            user.is_active = True  
-            user.save()
-            
             print(f"User saved successfully: {user.email}")
             print(f"Wallet creation signal should trigger now...")
             return user
