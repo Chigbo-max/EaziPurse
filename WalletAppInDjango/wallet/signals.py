@@ -12,6 +12,11 @@ def create_wallet(sender, instance, created, **kwargs):
     if created:
         print(f"Creating wallet for user: {instance.email}")
         
+        # Check if wallet already exists (to prevent duplicates)
+        if Wallet.objects.filter(user=instance).exists():
+            print(f"Wallet already exists for user: {instance.email}")
+            return
+        
         # Generate account number from phone number (remove first digit)
         def generate_account_number_from_phone():
             if instance.phone and len(instance.phone) >= 11:

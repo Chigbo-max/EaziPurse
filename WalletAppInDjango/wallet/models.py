@@ -6,6 +6,9 @@ from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 
+def generate_reference():
+    return 'ref_' + str(uuid4())
+
 
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
@@ -36,7 +39,7 @@ class Transaction(models.Model):
         ("B", "BALANCE"),
 
     ]
-    reference = models.CharField(max_length=40, unique=True, default = 'ref_' + str(uuid4))
+    reference = models.CharField(max_length=40, unique=True, default=generate_reference)
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE, default='D')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     transaction_time = models.DateTimeField(auto_now_add=True)
