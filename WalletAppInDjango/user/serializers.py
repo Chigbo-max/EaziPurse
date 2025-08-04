@@ -11,6 +11,8 @@ from .models import Profile, AdminSettings
 User = get_user_model()
 
 class CustomUserCreateSerializer(UserCreateSerializer):
+    re_password = serializers.CharField(write_only=True)
+    
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('id', 'email', 'username', 'password', 're_password', 'first_name', 'last_name', 'phone')
