@@ -140,6 +140,10 @@ DJOSER = {
     'SEND_PASSWORD_RESET_EMAIL': True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'EMAIL': {
+        'password_reset': 'user.email.CustomPasswordResetEmail',
+        'password_reset_confirm': 'user.email.CustomPasswordResetEmail',
+    },
+    'TEMPLATES': {
         'password_reset': 'email/password_reset_email.html',
         'password_reset_confirm': 'email/password_reset_email.html',
     },

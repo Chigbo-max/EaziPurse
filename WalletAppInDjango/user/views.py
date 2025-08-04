@@ -797,6 +797,8 @@ class CustomPasswordResetView(generics.GenericAPIView):
             # Log email attempt
             logger.info(f"Attempting to send password reset email to {email}")
             logger.info(f"Reset URL: {reset_url}")
+            logger.info(f"Email configuration: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            logger.info(f"From email: {settings.DEFAULT_FROM_EMAIL}")
             
             send_mail(
                 subject=subject,
@@ -811,7 +813,13 @@ class CustomPasswordResetView(generics.GenericAPIView):
             
             return Response({
                 'message': 'Password reset email sent successfully',
-                'email': email
+                'email': email,
+                'debug_info': {
+                    'email_host': settings.EMAIL_HOST,
+                    'email_port': settings.EMAIL_PORT,
+                    'from_email': settings.DEFAULT_FROM_EMAIL,
+                    'reset_url': reset_url
+                }
             }, status=200)
             
         except User.DoesNotExist:
@@ -819,4 +827,6 @@ class CustomPasswordResetView(generics.GenericAPIView):
             return Response({'error': 'User with this email does not exist'}, status=404)
         except Exception as e:
             logger.error(f"Error sending password reset email to {email}: {str(e)}")
-            return Response({'error': 'Failed to send password reset email'}, status=500)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return Response({'error': 'Failed to send password reset email', 'debug_error': str(e)}, status=500)
