@@ -72,15 +72,15 @@ def inspect_database():
         
     except Exception as e:
         print(f"Error connecting to database: {e}")
-        print("\nMake sure you have set the DATABASE_URL environment variable")
-        print("You can get this from your Render dashboard")
+        print("\nMake sure you have set the MONGO_URI environment variable")
+        print("You can get this from your Atlas dashboard")
 
 if __name__ == "__main__":
-    # Check if DATABASE_URL is set
-    if not os.getenv('DATABASE_URL'):
-        print("❌ DATABASE_URL environment variable not set!")
+    uri = os.getenv('MONGO_URI') or os.getenv('DATABASE_URL')
+    if not uri:
+        print("❌ MONGO_URI environment variable not set!")
         print("\nTo set it, run:")
-        print("$env:DATABASE_URL = 'your_render_database_url_here'")
+        print("$env:MONGO_URI = 'your_mongodb_atlas_connection_string'")
         print("\nOr add it to your PowerShell profile")
         sys.exit(1)
     

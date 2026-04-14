@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 from datetime import datetime
 from django.utils import timezone
@@ -65,11 +66,14 @@ def fund_wallet(request):
             "Authorization": f"Bearer {secret}",
         }
 
+        callback_url = os.getenv('PAYSTACK_CALLBACK_URL', 'https://eazipurse-ng.onrender.com/wallet/verify')
+
+
         data = {
             "amount": amount,
             "reference": reference,
             "email": email,
-            "callback_url": "https://eazipurse-ng.onrender.com/wallet/verify"
+            "callback_url": callback_url,
         }
 
         response_str = requests.post(url=url, json=data, headers=headers)
@@ -104,16 +108,20 @@ def verify_fund(request):
     response_str = requests.get(url=url, headers=headers)
     response = response_str.json()
     if response['status'] and response['data']['status'] == 'success': 
-        amount =  (response['data']['amount']/100)
+        amount = response['data']['amount'] / 100
         try:
-            transaction = Transaction.objects.get(reference=reference, verified=False)
+            transaction = Transaction.objects.get(reference=reference)
         except Transaction.DoesNotExist:
             return Response({"message": "Transaction does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        if transaction.verified:
+            return Response({"message": "Transaction already verified"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get the user from the transaction instead of request.user
         user = transaction.sender
         wallet = get_object_or_404(Wallet, user=user) #django's shortcut to get from model, instead of try and catch
-        wallet.deposit(Decimal(amount))
+        deposit_amount = Decimal(str(amount))
+        wallet.deposit(deposit_amount)
         transaction.verified = True
         transaction.save()
         subject="EaziPurse Transaction Alert"
@@ -125,10 +133,14 @@ def verify_fund(request):
         """
         from_email = settings.EMAIL_HOST_USER
         recipient_email= user.email
-        send_mail(subject=subject,
-                  message=message,
-                  from_email=from_email,
-                  recipient_list=[recipient_email])
+        try:
+            send_mail(subject=subject,
+                      message=message,
+                      from_email=from_email,
+                      recipient_list=[recipient_email])
+        except Exception as mail_error:
+            # Log email sending failures but still complete the transaction.
+            print(f"Failed to send transaction email: {mail_error}")
 
         return Response({"message": "Transaction successfully verified"}, status=status.HTTP_200_OK)
     return Response({"message": "Unable to verify transaction"}, status=status.HTTP_400_BAD_REQUEST)

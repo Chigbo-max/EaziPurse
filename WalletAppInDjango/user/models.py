@@ -90,8 +90,19 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="user/profile/image", null=True, blank=True, validators=[FileExtensionValidator(["jpg", "jpeg", "png"])])
     address = models.TextField(null=True, blank=True)
-    nin = models.CharField(max_length=11, unique=True, null=True, blank=True)
-    bvn = models.CharField(max_length=11, unique=True, null=True, blank=True)
+    nin = models.CharField(max_length=11, null=True, blank=True)
+    bvn = models.CharField(max_length=11, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.nin:
+            existing_nin = Profile.objects.filter(nin=self.nin).exclude(pk=self.pk)
+            if existing_nin.exists():
+                raise ValidationError({'nin': 'This NIN is already registered with another account.'})
+        if self.bvn:
+            existing_bvn = Profile.objects.filter(bvn=self.bvn).exclude(pk=self.pk)
+            if existing_bvn.exists():
+                raise ValidationError({'bvn': 'This BVN is already registered with another account.'})
+        super().save(*args, **kwargs)
 
 
 class LoginHistory(models.Model):

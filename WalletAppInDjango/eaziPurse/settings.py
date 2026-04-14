@@ -14,9 +14,11 @@ from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env.development if it exists
+# Load environment variables from .env and optional .env.development.
+# .env.development can override .env for local development.
+load_dotenv('.env')
 if os.path.exists('.env.development'):
-    load_dotenv('.env.development')
+    load_dotenv('.env.development', override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,19 +89,40 @@ WSGI_APPLICATION = 'eaziPurse.wsgi.application'
 
 import dj_database_url
 
-# Database configuration
+# MongoDB Atlas configuration
 DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
-    # Use the provided DATABASE_URL (for production)
+MONGO_URI = os.getenv('MONGO_URI')
+if not MONGO_URI and DATABASE_URL and DATABASE_URL.startswith('mongodb'):
+    MONGO_URI = DATABASE_URL
+
+MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'eazipurse_db')
+
+try:
+    import djongo  # noqa: F401
+    DJONGO_AVAILABLE = True
+except ImportError:
+    DJONGO_AVAILABLE = False
+
+if MONGO_URI and DJONGO_AVAILABLE:
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        'default': {
+            'ENGINE': 'djongo',
+            'NAME': MONGO_DB_NAME,
+            'CLIENT': {
+                'host': MONGO_URI,
+            },
+            'ENFORCE_SCHEMA': False,
+        }
+    }
+elif MONGO_URI and not DJONGO_AVAILABLE:
+    # MongoDB is configured, but djongo is not installed. Fall back to SQLite for local development.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 else:
-    # Use SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -188,13 +211,16 @@ SIMPLE_JWT = {
 PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_KEY")
 PAYSTACK_SECRET_KEY=os.getenv("PAYSTACK_SECRET_KEY")
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 

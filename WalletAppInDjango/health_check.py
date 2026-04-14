@@ -2,6 +2,7 @@
 import os
 import sys
 import django
+from pymongo import MongoClient
 
 # Add the project directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -22,13 +23,24 @@ def health_check():
     print(f"✅ ALLOWED_HOSTS: {settings.ALLOWED_HOSTS}")
     
     # Check database
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1;")
-            print("✅ Database connection: OK")
-    except Exception as e:
-        print(f"❌ Database connection: FAILED - {e}")
-        return False
+    mongo_uri = os.getenv('MONGO_URI') or os.getenv('DATABASE_URL')
+    if mongo_uri and mongo_uri.startswith('mongodb'):
+        try:
+            client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+            client.admin.command('ping')
+            print("✅ Database connection: OK (MongoDB Atlas)")
+            client.close()
+        except Exception as e:
+            print(f"❌ Database connection: FAILED - {e}")
+            return False
+    else:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1;")
+                print("✅ Database connection: OK")
+        except Exception as e:
+            print(f"❌ Database connection: FAILED - {e}")
+            return False
     
     # Check if migrations are applied
     try:

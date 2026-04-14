@@ -15,7 +15,18 @@ class Wallet(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     account_number = models.CharField(max_length=10, unique=True)
 
+    def _normalize_decimal(self, value):
+        if value is None:
+            return Decimal("0.00")
+        if isinstance(value, Decimal):
+            return value
+        if hasattr(value, 'to_decimal'):
+            return value.to_decimal()
+        return Decimal(str(value))
+
     def deposit(self, amount):
+        amount = self._normalize_decimal(amount)
+        self.balance = self._normalize_decimal(self.balance)
         if amount > Decimal("0.00"):
             self.balance += amount
             self.save()
@@ -23,6 +34,8 @@ class Wallet(models.Model):
         return False
 
     def withdraw(self, amount):
+        amount = self._normalize_decimal(amount)
+        self.balance = self._normalize_decimal(self.balance)
         if amount > Decimal("0.00"):
             if amount <= self.balance:
                 self.balance -= amount
@@ -47,7 +60,17 @@ class Transaction(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sender', null=True)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver', null=True)
 
+    def _normalize_decimal(self, value):
+        if value is None:
+            return Decimal('0.00')
+        if isinstance(value, Decimal):
+            return value
+        if hasattr(value, 'to_decimal'):
+            return value.to_decimal()
+        return Decimal(str(value))
+
     def save(self, *args, **kwargs):
         if self.sender is None and self.receiver is None:
             raise ValidationError("Sender and receiver cannot be None")
+        self.amount = self._normalize_decimal(self.amount)
         super().save(*args, **kwargs)

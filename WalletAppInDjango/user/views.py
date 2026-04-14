@@ -146,11 +146,24 @@ class DashboardView(RetrieveAPIView):
         recent_transactions = user_transactions.order_by('-transaction_time')[:4]
         
         # Calculate transaction volume (total amount of all transactions)
-        transaction_volume = user_transactions.aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
-        
+        try:
+            agg_total = user_transactions.aggregate(total=Sum('amount'))['total']
+            if agg_total is None:
+                transaction_volume = Decimal('0.00')
+            elif isinstance(agg_total, Decimal):
+                transaction_volume = agg_total
+            else:
+                transaction_volume = Decimal(str(agg_total))
+        except TypeError:
+            transaction_volume = sum(
+                (Decimal(str(amount)) for amount in user_transactions.values_list('amount', flat=True)),
+                Decimal('0.00')
+            )
+
         current_balance = wallet.balance
+        if not isinstance(current_balance, Decimal):
+            current_balance = Decimal(str(current_balance))
+
         if transaction_volume > 0:
             savings_growth = ((current_balance / transaction_volume) * 100) - 100
         else:
@@ -162,7 +175,10 @@ class DashboardView(RetrieveAPIView):
         recent_transactions_data = []
         for trans in recent_transactions:
             transaction_type = 'Deposit' if trans.transaction_type == 'D' else 'Transfer'
-            amount = f"₦{trans.amount:,.2f}"
+            amount_value = trans.amount
+            if not isinstance(amount_value, Decimal):
+                amount_value = Decimal(str(amount_value))
+            amount = f"₦{amount_value:,.2f}"
             date = trans.transaction_time.strftime('%Y-%m-%d')
             status = 'Completed' if trans.verified else 'Pending'
             
@@ -191,7 +207,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
     def post(self, request, *args, **kwargs):
-        print(f"Login attempt - Data received: {request.data}")
         
         if 'email' in request.data:
             request.data['username'] = request.data.pop('email')
