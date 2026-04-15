@@ -1,8 +1,10 @@
 # Use Python 3.12 slim as base image
 FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
+# Build-time arguments and default environment variables
+ARG SECRET_KEY=django-insecure-build-secret
+ENV SECRET_KEY=${SECRET_KEY} \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=eaziPurse.settings
 
