@@ -14,7 +14,7 @@ class Command(BaseCommand):
         self.stdout.write('Ensuring admin wallets are properly set up...')
         
         # Find admin users
-        admin_users = User.objects.filter(is_superuser=True)
+        admin_users = User.objects.filter(is_superuser__in=[True])
         
         for admin in admin_users:
             self.stdout.write(f'Processing admin: {admin.email} (ID: {admin.id})')

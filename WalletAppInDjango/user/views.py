@@ -19,6 +19,7 @@ from django.db import IntegrityError
 from decimal import Decimal
 import datetime
 from django.core.exceptions import PermissionDenied
+from bson.decimal128 import Decimal128
 from django.db.models import Sum, Q
 from wallet.models import Transaction, Wallet
 from .serializers import LoginHistorySerializer, AdminDashboardSerializer, AdminUserSerializer, AdminSettingsSerializer
@@ -32,6 +33,26 @@ from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def normalize_decimal_value(value):
+    if value is None:
+        return Decimal('0.00')
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, Decimal128):
+        return value.to_decimal()
+    if hasattr(value, 'to_decimal'):
+        return value.to_decimal()
+    return Decimal(str(value))
+
+
+def safe_amount_sum(queryset):
+    return sum(
+        (normalize_decimal_value(value) for value in queryset.values_list('amount', flat=True)),
+        Decimal('0.00')
+    )
+
 
 class ProfileViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -147,13 +168,7 @@ class DashboardView(RetrieveAPIView):
         
         # Calculate transaction volume (total amount of all transactions)
         try:
-            agg_total = user_transactions.aggregate(total=Sum('amount'))['total']
-            if agg_total is None:
-                transaction_volume = Decimal('0.00')
-            elif isinstance(agg_total, Decimal):
-                transaction_volume = agg_total
-            else:
-                transaction_volume = Decimal(str(agg_total))
+            transaction_volume = safe_amount_sum(user_transactions)
         except TypeError:
             transaction_volume = sum(
                 (Decimal(str(amount)) for amount in user_transactions.values_list('amount', flat=True)),
@@ -325,12 +340,10 @@ class AdminDashboardView(generics.RetrieveAPIView):
             
             
             total_users = User.objects.count()
-            active_users = User.objects.filter(is_active=True).count()
+            active_users = User.objects.filter(is_active__in=[True]).count()
             
             total_transactions = Transaction.objects.count()
-            total_transaction_volume = Transaction.objects.aggregate(
-                total=Sum('amount')
-            )['total'] or 0
+            total_transaction_volume = safe_amount_sum(Transaction.objects.all())
             
             # Get recent users (last 7 days) - limit to 4
             from datetime import datetime, timedelta
@@ -346,7 +359,11 @@ class AdminDashboardView(generics.RetrieveAPIView):
             # Calculate revenue (assuming 1% transaction fee)
             revenue = float(total_transaction_volume) * 0.01
             
-            active_wallets = Wallet.objects.filter(balance__gt=0).count()
+            # Avoid djongo Decimal comparison by counting in Python
+            active_wallets = sum(
+                1 for balance in Wallet.objects.values_list('balance', flat=True)
+                if normalize_decimal_value(balance) > Decimal('0.00')
+            )
             
           
             recent_users_data = []
@@ -365,7 +382,7 @@ class AdminDashboardView(generics.RetrieveAPIView):
             for transaction in recent_transactions:
                 recent_transactions_data.append({
                     'id': transaction.id,
-                    'amount': float(transaction.amount),
+                    'amount': float(normalize_decimal_value(transaction.amount)),
                     'transaction_type': transaction.transaction_type,
                     'verified': transaction.verified,
                     'timestamp': transaction.transaction_time,
@@ -425,14 +442,13 @@ class AdminUsersView(generics.ListAPIView):
         # Status filter
         status = self.request.query_params.get('status', None)
         if status == 'active':
-            queryset = queryset.filter(account_status='active', is_active=True)
+            queryset = queryset.filter(account_status='active', is_active__in=[True])
         elif status == 'pending':
             queryset = queryset.filter(account_status='pending')
         elif status == 'suspended':
             queryset = queryset.filter(account_status='suspended')
         elif status == 'inactive':
-            queryset = queryset.filter(is_active=False)
-        
+            queryset = queryset.filter(is_active__in=[False])
         return queryset
 
 
@@ -526,7 +542,7 @@ class AdminAnalyticsView(generics.RetrieveAPIView):
             
             # User Analytics
             total_users = User.objects.count()
-            active_users = User.objects.filter(is_active=True, account_status='active').count()
+            active_users = User.objects.filter(is_active__in=[True], account_status='active').count()
             
             # Filter new users based on selected period
             new_users_period = User.objects.filter(date_joined__gte=start_date).count()
@@ -536,22 +552,20 @@ class AdminAnalyticsView(generics.RetrieveAPIView):
             
             # Transaction Analytics
             total_transactions = Transaction.objects.count()
-            total_volume = Transaction.objects.aggregate(total=Sum('amount'))['total'] or 0
-            verified_transactions = Transaction.objects.filter(verified=True).count()
-            pending_transactions = Transaction.objects.filter(verified=False).count()
-            
-            # Filter transactions based on selected period
+            total_volume = safe_amount_sum(Transaction.objects.all())
+            verified_transactions = Transaction.objects.filter(verified__in=[True]).count()
+            pending_transactions = Transaction.objects.filter(verified__in=[False]).count()
             transactions_period = Transaction.objects.filter(transaction_time__gte=start_date).count()
-            volume_period = Transaction.objects.filter(transaction_time__gte=start_date).aggregate(total=Sum('amount'))['total'] or 0
+            volume_period = safe_amount_sum(Transaction.objects.filter(transaction_time__gte=start_date))
             
             # Recent activity
             transactions_today = Transaction.objects.filter(transaction_time__date=today).count()
             transactions_week = Transaction.objects.filter(transaction_time__gte=week_ago).count()
             transactions_month = Transaction.objects.filter(transaction_time__gte=month_ago).count()
             
-            volume_today = Transaction.objects.filter(transaction_time__date=today).aggregate(total=Sum('amount'))['total'] or 0
-            volume_week = Transaction.objects.filter(transaction_time__gte=week_ago).aggregate(total=Sum('amount'))['total'] or 0
-            volume_month = Transaction.objects.filter(transaction_time__gte=month_ago).aggregate(total=Sum('amount'))['total'] or 0
+            volume_today = safe_amount_sum(Transaction.objects.filter(transaction_time__date=today))
+            volume_week = safe_amount_sum(Transaction.objects.filter(transaction_time__gte=week_ago))
+            volume_month = safe_amount_sum(Transaction.objects.filter(transaction_time__gte=month_ago))
             
             # Transaction types breakdown
             deposits = Transaction.objects.filter(transaction_type='D', transaction_time__gte=start_date).count()
@@ -568,8 +582,8 @@ class AdminAnalyticsView(generics.RetrieveAPIView):
             
             top_users_data = []
             for user in top_users:
-                sent_amount = Transaction.objects.filter(sender=user).aggregate(total=Sum('amount'))['total'] or 0
-                received_amount = Transaction.objects.filter(receiver=user).aggregate(total=Sum('amount'))['total'] or 0
+                sent_amount = safe_amount_sum(Transaction.objects.filter(sender=user))
+                received_amount = safe_amount_sum(Transaction.objects.filter(receiver=user))
                 total_volume = float(sent_amount) + float(received_amount)
                 if total_volume > 0:
                     top_users_data.append({
@@ -595,7 +609,7 @@ class AdminAnalyticsView(generics.RetrieveAPIView):
             for i in range(min(days_range, 30)):  # Limit to 30 days max for performance
                 date = today - timedelta(days=i)
                 day_transactions = Transaction.objects.filter(transaction_time__date=date).count()
-                day_volume = Transaction.objects.filter(transaction_time__date=date).aggregate(total=Sum('amount'))['total'] or 0
+                day_volume = safe_amount_sum(Transaction.objects.filter(transaction_time__date=date))
                 daily_activity.append({
                     'date': date.strftime('%Y-%m-%d'),
                     'transactions': day_transactions,
@@ -622,7 +636,7 @@ class AdminAnalyticsView(generics.RetrieveAPIView):
                 response_time = "150ms"  # Normal response time
             
             # Calculate error rate based on failed transactions
-            failed_transactions = Transaction.objects.filter(verified=False, transaction_time__gte=now - timedelta(hours=24)).count()
+            failed_transactions = Transaction.objects.filter(verified__in=[False], transaction_time__gte=now - timedelta(hours=24)).count()
             total_recent_transactions = Transaction.objects.filter(transaction_time__gte=now - timedelta(hours=24)).count()
             if total_recent_transactions > 0:
                 error_rate = f"{(failed_transactions / total_recent_transactions * 100):.1f}%"
@@ -720,7 +734,7 @@ class AdminReportDownloadView(generics.CreateAPIView):
             if report_type == 'User Activity Report':
                 # User analytics data
                 total_users = User.objects.count()
-                active_users = User.objects.filter(is_active=True, account_status='active').count()
+                active_users = User.objects.filter(is_active__in=[True], account_status='active').count()
                 new_users = User.objects.filter(date_joined__gte=start_date).count()
                 
                 # Generate PDF using the existing utility
@@ -730,7 +744,7 @@ class AdminReportDownloadView(generics.CreateAPIView):
             elif report_type == 'Transaction Summary Report':
                 # Transaction analytics data
                 total_transactions = Transaction.objects.filter(transaction_time__gte=start_date).count()
-                total_volume = Transaction.objects.filter(transaction_time__gte=start_date).aggregate(total=Sum('amount'))['total'] or 0
+                total_volume = safe_amount_sum(Transaction.objects.filter(transaction_time__gte=start_date))
                 avg_transaction = float(total_volume) / total_transactions if total_transactions > 0 else 0
                 
                 # Generate PDF using the existing utility
@@ -739,7 +753,7 @@ class AdminReportDownloadView(generics.CreateAPIView):
                 
             elif report_type == 'Revenue Analysis Report':
                 # Revenue analytics data
-                total_volume = Transaction.objects.filter(transaction_time__gte=start_date).aggregate(total=Sum('amount'))['total'] or 0
+                total_volume = safe_amount_sum(Transaction.objects.filter(transaction_time__gte=start_date))
                 total_revenue = float(total_volume) * 0.01
                 
                 # Generate PDF using the existing utility

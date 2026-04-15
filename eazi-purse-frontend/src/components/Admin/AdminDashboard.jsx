@@ -65,8 +65,8 @@ const AdminDashboard = () => {
       color: 'warning',
     },
     {
-      name: 'Revenue',
-      value: `₦${dashboardData?.revenue?.toLocaleString() || '0'}`,
+      name: 'Total Transaction Volume',
+      value: `₦${dashboardData?.total_transaction_volume?.toLocaleString() || '0'}`,
       change: '+15%',
       changeType: 'positive',
       icon: ChartBarIcon,

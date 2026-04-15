@@ -50,7 +50,8 @@ const ResetPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://eazipurse.onrender.com/auth/users/reset_password_confirm/', {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+      const response = await fetch(`${apiBase}/auth/users/reset_password_confirm/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

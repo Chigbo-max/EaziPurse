@@ -6,12 +6,32 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from io import BytesIO
 from datetime import datetime, timedelta
+from decimal import Decimal
 from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from bson.decimal128 import Decimal128
 from .models import Transaction, Wallet
 
 User = get_user_model()
+
+def normalize_decimal_value(value):
+    if value is None:
+        return Decimal('0.00')
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, Decimal128):
+        return value.to_decimal()
+    if hasattr(value, 'to_decimal'):
+        return value.to_decimal()
+    return Decimal(str(value))
+
+
+def safe_amount_sum(queryset):
+    return sum(
+        (normalize_decimal_value(value) for value in queryset.values_list('amount', flat=True)),
+        Decimal('0.00')
+    )
 
 def generate_platform_report():
     """
@@ -60,14 +80,14 @@ def generate_platform_report():
         
         # Get platform statistics
         total_users = User.objects.count()
-        active_users = User.objects.filter(is_active=True, account_status='active').count()
+        active_users = User.objects.filter(is_active__in=[True], account_status='active').count()
         pending_users = User.objects.filter(account_status='pending').count()
         suspended_users = User.objects.filter(account_status='suspended').count()
         
         total_transactions = Transaction.objects.count()
-        total_volume = Transaction.objects.aggregate(total=Sum('amount'))['total'] or 0
-        verified_transactions = Transaction.objects.filter(verified=True).count()
-        pending_transactions = Transaction.objects.filter(verified=False).count()
+        total_volume = safe_amount_sum(Transaction.objects.all())
+        verified_transactions = Transaction.objects.filter(verified__in=[True]).count()
+        pending_transactions = Transaction.objects.filter(verified__in=[False]).count()
         
         # Calculate revenue (1% of total volume)
         revenue = float(total_volume) * 0.01
@@ -117,9 +137,9 @@ def generate_platform_report():
             date_joined__gte=thirty_days_ago
         ).count()
         
-        recent_volume = Transaction.objects.filter(
+        recent_volume = safe_amount_sum(Transaction.objects.filter(
             transaction_time__gte=thirty_days_ago
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        ))
         
         recent_data = [
             ['Period', 'Transactions', 'New Users', 'Volume'],
@@ -150,8 +170,8 @@ def generate_platform_report():
         # Get users with their transaction volumes
         users_with_transactions = []
         for user in User.objects.all():
-            sent_amount = Transaction.objects.filter(sender=user).aggregate(total=Sum('amount'))['total'] or 0
-            received_amount = Transaction.objects.filter(receiver=user).aggregate(total=Sum('amount'))['total'] or 0
+            sent_amount = safe_amount_sum(Transaction.objects.filter(sender=user))
+            received_amount = safe_amount_sum(Transaction.objects.filter(receiver=user))
             total_volume = float(sent_amount) + float(received_amount)
             
             if total_volume > 0:

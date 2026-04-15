@@ -1,47 +1,22 @@
+version: '3.8'
+
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:17
-    container_name: eazipurse_postgres
-
-    env_file:
-      - .env
-        
-    environment:
-      POSTGRES_DB: eazipurse_db
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./postgres_migration.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
-    networks:
-      - eazipurse_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Backend API (Django)
   backend:
     build:
       context: ./WalletAppInDjango
       dockerfile: Dockerfile
     container_name: eazipurse_backend
+    env_file:
+      - .env
     environment:
       - DEBUG=False
       - DJANGO_SETTINGS_MODULE=eaziPurse.settings
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - JWT_SECRET=${SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - MONGO_URI=${MONGO_URI}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
       - PAYSTACK_KEY=${PAYSTACK_KEY}
       - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
+      - PAYSTACK_CALLBACK_URL=${PAYSTACK_CALLBACK_URL}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
@@ -54,28 +29,15 @@ services:
       - "8000:8000"
     networks:
       - eazipurse_network
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # Frontend (React)
   frontend:
     build:
       context: ./eazi-purse-frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
     container_name: eazipurse_frontend
-    environment:
-      - VITE_API_URL=http://localhost:8000
-      - NODE_ENV=production
-    volumes:
-      - ./eazi-purse-frontend:/app
-      - /app/node_modules
     ports:
       - "5173:5173"
     networks:
@@ -83,15 +45,8 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
-  postgres_data:
-    driver: local
   static_volume:
     driver: local
   media_volume:

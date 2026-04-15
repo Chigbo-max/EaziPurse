@@ -349,9 +349,9 @@ def admin_transaction_history(request):
         elif filter_type == 'withdrawals':
             transactions = transactions.filter(transaction_type='W')
         elif filter_type == 'verified':
-            transactions = transactions.filter(verified=True)
+            transactions = transactions.filter(verified__in=[True])
         elif filter_type == 'pending':
-            transactions = transactions.filter(verified=False)
+            transactions = transactions.filter(verified__in=[False])
         
         # Apply search
         search = request.GET.get('search', '')

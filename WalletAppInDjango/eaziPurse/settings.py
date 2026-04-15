@@ -14,14 +14,17 @@ from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env and optional .env.development.
-# .env.development can override .env for local development.
-load_dotenv('.env')
-if os.path.exists('.env.development'):
-    load_dotenv('.env.development', override=True)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
+
+# Load environment variables from .env and optional .env.development.
+# .env is stored at the repository root, not inside the Django app folder.
+load_dotenv(BASE_DIR / '.env')
+if not os.path.exists(BASE_DIR / '.env'):
+    load_dotenv(PROJECT_ROOT / '.env')
+if (PROJECT_ROOT / '.env.development').exists():
+    load_dotenv(PROJECT_ROOT / '.env.development', override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -89,8 +92,9 @@ WSGI_APPLICATION = 'eaziPurse.wsgi.application'
 
 import dj_database_url
 
-# MongoDB Atlas configuration
+# Database configuration
 DATABASE_URL = os.getenv('DATABASE_URL')
+USE_MONGO = os.getenv('USE_MONGO', 'false').lower() in ('1', 'true', 'yes')
 MONGO_URI = os.getenv('MONGO_URI')
 if not MONGO_URI and DATABASE_URL and DATABASE_URL.startswith('mongodb'):
     MONGO_URI = DATABASE_URL
@@ -103,13 +107,22 @@ try:
 except ImportError:
     DJONGO_AVAILABLE = False
 
-if MONGO_URI and DJONGO_AVAILABLE:
+if DATABASE_URL and not DATABASE_URL.startswith('mongodb') and not USE_MONGO:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG)
+    }
+elif MONGO_URI and DJONGO_AVAILABLE:
     DATABASES = {
         'default': {
             'ENGINE': 'djongo',
             'NAME': MONGO_DB_NAME,
             'CLIENT': {
                 'host': MONGO_URI,
+                'ssl': True,
+                'retryWrites': True,
+                'serverSelectionTimeoutMS': 10000,
+                'connectTimeoutMS': 10000,
+                'socketTimeoutMS': 10000,
             },
             'ENFORCE_SCHEMA': False,
         }
